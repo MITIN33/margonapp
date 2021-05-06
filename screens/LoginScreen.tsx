@@ -46,7 +46,7 @@ class LoginScreen extends Component<any, any> {
 
         console.log('Sending request');
         Keyboard.dismiss();
-        margonServer.post('/auth/login', userLoginRequest)
+        margonServer.post('/auth/token', userLoginRequest)
             .then((response) => {
                 userstore.saveUserData(response.data);
             })
