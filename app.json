@@ -1,0 +1,12 @@
+{
+  "name": "MargonChat",
+  "displayName": "MargonChat",
+  "expo": {
+    "name": "MargonChat",
+    "slug": "MargonChat",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  }
+}
