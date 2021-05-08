@@ -3,6 +3,7 @@ import React from "react";
 import { GiftedChat, IMessage } from "react-native-gifted-chat";
 import CustomActions from '../components/custom-actions';
 import { Image } from 'react-native-elements';
+import { StatusBar } from "react-native";
 
 const user = {
     _id: 1,
@@ -37,6 +38,8 @@ class ChatScreen extends React.Component<any, any> {
 
     constructor(props) {
         super(props);
+        if (Platform.OS !== 'ios')
+            StatusBar.setBackgroundColor('#71afe5');
         this.state = {
             messages: [
                 {

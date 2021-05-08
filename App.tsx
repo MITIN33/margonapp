@@ -21,10 +21,8 @@ const theme = {
   Button: {
     containerStyle: {
       height: 40,
-      justifyContent: "center",
       width: "100%",
       borderRadius: 5,
-      margin: 20
     }
   }
 };

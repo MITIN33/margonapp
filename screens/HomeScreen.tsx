@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import { Platform } from 'react-native';
+import { StatusBar } from 'react-native';
 import { View, StyleSheet } from 'react-native';
 import { Avatar, ListItem, Image, Text, Badge } from 'react-native-elements';
 import { Icon } from 'react-native-elements';
@@ -61,6 +63,8 @@ class HomeScreen extends Component<any, any> {
 
     constructor(props) {
         super(props);
+        if (Platform.OS !== 'ios')
+            StatusBar.setBackgroundColor('#71afe5');
     }
 
     render() {

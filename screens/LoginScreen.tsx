@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react';
 import React, { Component } from 'react';
-import { Text, View, Image, Alert, Keyboard } from 'react-native';
+import { Text, View, Image, Alert, Keyboard, ImageBackground } from 'react-native';
 import { Input, Button } from 'react-native-elements';
 import { color } from 'react-native-elements/dist/helpers';
 import { margonServer } from '../api/axios-instance';
@@ -20,21 +20,20 @@ class LoginScreen extends Component<any, any> {
 
     render() {
         return (
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
-                <Image source={require('../assets/ms_logo.png')} width={10} resizeMode={'cover'} />
-                <Input placeholder={"User Name"} onChangeText={this.onUserNameChange} />
+            <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+                {/* <Input placeholder={"User Name"} onChangeText={this.onUserNameChange} />
                 <Input placeholder={'Password'} secureTextEntry onChangeText={this.onPasswordChange} />
                 <View style={{ flexDirection: "row", justifyContent: "space-between", width: "100%" }}>
                     <Text onPress={() => this.props.navigation.navigate("SignUp")}>Register</Text>
                     <Text>Forgot Password</Text>
                 </View>
-                <Button title="Login" loading={this.state.isLoading} disabled={this.state.isLoading} onPress={(ev) => this.onLoginClick(ev)} />
                 <Divider text="OR" />
-                <Button icon={{ name: "facebook", size: 20, color: "white" }} title="Login via Facebook" />
+                 
+                <Button icon={{ name: "facebook", size: 20, color: "white" }} title="Login via Facebook" /> */}
+                <Button title="Login" loading={this.state.isLoading} disabled={this.state.isLoading} onPress={(ev) => this.onLoginClick(ev)} />
             </View>
         );
     }
-
 
     private onLoginClick = (ev) => {
 

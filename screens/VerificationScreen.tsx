@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Container } from '../components/base-components';
 import OTPBox from '../components/otp-verfication';
 
-class StatusScreen extends Component<any, any> {
+class VerificationScreen extends Component<any, any> {
 
     constructor(props) {
         super(props);
@@ -17,4 +17,4 @@ class StatusScreen extends Component<any, any> {
     }
 }
 
-export default StatusScreen;
+export default VerificationScreen;
