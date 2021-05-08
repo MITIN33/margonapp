@@ -12,3 +12,8 @@ export interface UserModel {
     phone: string,
     email: string
 }
+
+export interface AuthResponse {
+    expireAt: string,
+    token: string
+}

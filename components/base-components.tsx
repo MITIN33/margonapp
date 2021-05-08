@@ -1,7 +1,7 @@
 import { useTheme } from '@react-navigation/native';
 import * as React from 'react';
 import { Text, View } from 'react-native';
-import { Button as PaperButton, TextInput as PaperInput } from 'react-native-paper';
+import { Button as RNEButton, Input as RNEInput } from 'react-native-elements';
 
 
 function Container(props) {
@@ -10,22 +10,20 @@ function Container(props) {
 }
 
 function Button(props) {
-    const { colors } = useTheme();
-    return <PaperButton color={colors.primary} mode={props.mode} style={[{ height: 40, justifyContent: "center", width: "100%", borderRadius: 5, margin: 20 }, props.style]} {...props}>
+    return <RNEButton containerStyle={[{ height: 40, justifyContent: "center", width: "100%", borderRadius: 5, margin: 20 }, props.style]} {...props}>
         {props.title}
-    </PaperButton>;
+    </RNEButton>;
 }
 
 function TextInput(props){
-    return <PaperInput label={props.label} returnKeyLabel='Done' returnKeyType='done' style={{ width: "100%", marginTop: 20, height: 50 }} mode={props.mode} {...props} />
+    return <RNEInput inputStyle={{marginTop: 0 }} returnKeyLabel='Done' returnKeyType='done' {...props} />
 }
-
 
 function Divider(props) {
     return (
         <>
             {props.text ?
-                <View style={{ flexDirection: "row", width: "85%", marginBottom: 10 }}>
+                <View style={{ flexDirection: "row", width: "85%" }}>
                     <View style={{ borderColor: 'lightgrey', borderBottomWidth: 1, flex: 1, alignSelf: "center" }}></View>
                     <Text style={{ alignSelf: "center", paddingHorizontal: 5 }}>{props.text}</Text>
                     <View style={{ borderColor: 'lightgrey', borderBottomWidth: 1, flex: 1, alignSelf: "center" }}></View>

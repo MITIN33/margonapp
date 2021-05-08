@@ -5,10 +5,12 @@ import React, { Component } from "react";
 import LoginScreen from "../screens/LoginScreen";
 import { userstore } from "../stores/UserStore";
 import TabNavigation from "../screens/TabNavigation";
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from "react-native";
+import { KeyboardAvoidingView, Platform, ScrollView, StatusBar, StyleSheet, View } from "react-native";
 import SignupScreen from "../screens/SignUpScreen";
 import ChatScreen from "../screens/ChatScreen";
-import { ActivityIndicator } from "react-native-paper";
+import { ActivityIndicator } from "react-native";
+import AppTheme from "../theme/AppTheme";
+import { Icon } from "react-native-elements";
 
 const Stack = createStackNavigator();
 
@@ -17,11 +19,15 @@ class AppNavigator extends Component {
 
     constructor(props) {
         super(props);
+        if (Platform.OS !== 'ios')
+            StatusBar.setBackgroundColor('#71afe5');
     }
 
     componentDidMount() {
-        console.log('loading user');
-        userstore.loadUser();
+        userstore.fetchUser()
+            .then(() => {
+                userstore.setIsUserLoading(false);
+            })
     }
 
     render() {
@@ -30,20 +36,30 @@ class AppNavigator extends Component {
             return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><ActivityIndicator /></View>
         }
 
-        console.log(userstore.user);
         return (
             <KeyboardAvoidingView
                 style={{ flex: 1, flexDirection: 'column', justifyContent: 'center' }}
                 behavior={Platform.OS === "ios" ? "padding" : "height"}>
                 <NavigationContainer>
-                    <Stack.Navigator>
-
+                    <Stack.Navigator
+                        screenOptions={{
+                            headerStyle: {
+                                backgroundColor: AppTheme.colors.themeColor,
+                                elevation: 0,
+                                shadowOpacity: 0
+                            },
+                            headerRight: () => (<Icon name='ellipsis-vertical-outline' type='ionicon' />)
+                        }}
+                    >
                         {userstore.isUserSigned ?
                             (
 
                                 <>
-                                    <Stack.Screen name="Home" component={TabNavigation} options={{ title: 'Home', headerTitleAlign: "center", }} />
-                                    <Stack.Screen name="Chat" component={ChatScreen} options={{ title: 'Home', headerTitleAlign: "center", }} />
+                                    <Stack.Screen name="Home" component={TabNavigation} options={{
+                                        title: 'Home',
+                                        headerLeft: () => (<Icon name='person-circle-outline' size={30} type='ionicon' style={{ marginLeft: 15 }} />)
+                                    }} />
+                                    <Stack.Screen name="Chat" component={ChatScreen} options={{ title: 'Chat' }} />
                                 </>
                             ) :
                             (
@@ -54,7 +70,7 @@ class AppNavigator extends Component {
                             )}
                     </Stack.Navigator>
                 </NavigationContainer>
-            </KeyboardAvoidingView>
+            </KeyboardAvoidingView >
         );
     };
 }

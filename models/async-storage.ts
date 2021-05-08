@@ -10,7 +10,7 @@ class AsyncStorageHelper {
                     console.log("an error");
                     throw err;
                 }
-                console.log('Successfully saved data in local store');
+                console.log('Successfully saved data in local store for ' + key);
             }).catch((err) => {
                 console.log("error is: " + err);
             });

@@ -1,31 +1,32 @@
 import AppNavigator from "./core/AppNavigator";
 import React, { Component } from 'react';
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { Provider as PaperProvider, DefaultTheme } from "react-native-paper";
-import { KeyboardAvoidingView, ScrollView, StatusBar } from "react-native";
-import { ScrollPager } from "react-native-tab-view";
+import { StatusBar } from "react-native";
+import { ThemeProvider } from "react-native-elements";
 
 class App extends Component {
   render() {
     return (
-      <PaperProvider theme={theme}>
+      <ThemeProvider theme={theme}>
         <SafeAreaProvider>
           <AppNavigator />
-          <StatusBar barStyle='dark-content'/>
+          <StatusBar barStyle='dark-content' />
         </SafeAreaProvider>
-      </PaperProvider>
+      </ThemeProvider>
     );
   }
 }
 
 const theme = {
-  ...DefaultTheme,
-  roundness: 2,
-  colors: {
-    ...DefaultTheme.colors,
-    primary: '#3498db',
-    accent: '#f1c40f',
-  },
+  Button: {
+    containerStyle: {
+      height: 40,
+      justifyContent: "center",
+      width: "100%",
+      borderRadius: 5,
+      margin: 20
+    }
+  }
 };
 
 export default App;

@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import HomeScreen from './HomeScreen';
 import ChatHistory from './ChatHistory';
+import AppTheme from '../theme/AppTheme';
+import StatusScreen from './StatusScreen';
 
 class TabNavigation extends Component {
 
@@ -10,10 +12,13 @@ class TabNavigation extends Component {
         const Tab = createMaterialTopTabNavigator();
 
         return (
-            <Tab.Navigator lazy={true}>
-                <Tab.Screen name="Online" component={HomeScreen} />
-                <Tab.Screen name="Chats" component={ChatHistory} />
-            </Tab.Navigator>
+            <>
+                <Tab.Navigator initialRouteName='Online' tabBarOptions={{ style: { backgroundColor: AppTheme.colors.themeColor } }}>
+                    <Tab.Screen name="Status" component={StatusScreen} />
+                    <Tab.Screen name="Online" component={HomeScreen} />
+                    <Tab.Screen name="Chats" component={ChatHistory} />
+                </Tab.Navigator>
+            </>
         );
     }
 }
