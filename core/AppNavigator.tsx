@@ -17,42 +17,47 @@ import VerificationScreen from "../screens/VerificationScreen";
 const Stack = createStackNavigator();
 
 @observer
-class AppNavigator extends Component {
+class AppNavigator extends Component<any, any> {
 
     constructor(props) {
         super(props);
+        this.state = {
+            isLoading: true
+        }
     }
 
     componentDidMount() {
-        userstore.fetchUser()
-            .then(() => {
-                userstore.setIsUserLoading(false);
-            })
+        userstore.init()
+            .finally(() => this.setState({ isLoading: false }))
     }
 
     render() {
 
-        if (userstore.isUserloading) {
+        if (this.state.isLoading) {
             return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><ActivityIndicator /></View>
         }
+        const firstName = userstore.user?.firstName;
 
         return (
+
             <KeyboardAvoidingView
                 style={{ flex: 1, flexDirection: 'column', justifyContent: 'center' }}
                 behavior={Platform.OS === "ios" ? "padding" : "height"}>
                 <NavigationContainer>
-                    <Stack.Navigator screenOptions={{headerShown: false}}>
+                    <Stack.Navigator screenOptions={{ headerShown: false }}>
                         {userstore.isUserSigned ?
                             (
                                 <>
                                     <Stack.Screen name="Home" component={TabNavigation} options={{
-                                        title: 'Home',
+                                        title: firstName,
+                                        headerShown: true,
                                         headerLeft: () => (<Icon name='person-circle-outline' size={30} type='ionicon' style={{ marginLeft: 15 }} />),
                                         headerRight: () => (<Icon name='ellipsis-vertical-outline' type='ionicon' />),
                                         headerStyle: headerStyle
                                     }} />
                                     <Stack.Screen name="Chat" component={ChatScreen} options={{
                                         title: 'Chat',
+                                        headerShown: true,
                                         headerRight: () => (<Icon name='ellipsis-vertical-outline' type='ionicon' />),
                                         headerStyle: headerStyle
                                     }} />

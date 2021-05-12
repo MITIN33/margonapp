@@ -4,7 +4,6 @@ class AsyncStorageHelper {
 
     public saveData(key, value) {
         if (value) {
-            console.log('Savng data:' + JSON.stringify(value));
             AsyncStorage.setItem(key, JSON.stringify(value), (err) => {
                 if (err) {
                     console.log("an error");

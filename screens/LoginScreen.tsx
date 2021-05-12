@@ -4,6 +4,7 @@ import { Text, View, Image, Alert, Keyboard, ImageBackground } from 'react-nativ
 import { Input, Button } from 'react-native-elements';
 import { color } from 'react-native-elements/dist/helpers';
 import { margonServer } from '../api/axios-instance';
+import { margonAPI } from '../api/margon-server-api';
 import { Divider } from '../components/base-components';
 import { userstore } from '../stores/UserStore';
 
@@ -20,16 +21,18 @@ class LoginScreen extends Component<any, any> {
 
     render() {
         return (
-            <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+            <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
                 {/* <Input placeholder={"User Name"} onChangeText={this.onUserNameChange} />
-                <Input placeholder={'Password'} secureTextEntry onChangeText={this.onPasswordChange} />
                 <View style={{ flexDirection: "row", justifyContent: "space-between", width: "100%" }}>
                     <Text onPress={() => this.props.navigation.navigate("SignUp")}>Register</Text>
                     <Text>Forgot Password</Text>
                 </View>
                 <Divider text="OR" />
                  
-                <Button icon={{ name: "facebook", size: 20, color: "white" }} title="Login via Facebook" /> */}
+                <Button icon={{ name: "facebook", size: 20, color: "white" }} title="Login via Facebook" /> 
+                */}
+                <Input placeholder={"User Name"} onChangeText={this.onUserNameChange} />
+                <Input placeholder={'Password'} secureTextEntry onChangeText={this.onPasswordChange} />
                 <Button title="Login" loading={this.state.isLoading} disabled={this.state.isLoading} onPress={(ev) => this.onLoginClick(ev)} />
             </View>
         );
@@ -40,15 +43,21 @@ class LoginScreen extends Component<any, any> {
         this.setLoading(true);
         const userLoginRequest = {
             userName: this.state.userName,
-            password: this.state.password
+            password: this.state.password,
+            grantType: 1
         }
 
         console.log('Sending request');
         Keyboard.dismiss();
-        margonServer.post('/auth/token', userLoginRequest)
+        margonAPI.GetToken(userLoginRequest)
             .then((response) => {
-                userstore.saveTokenInfo(response.data);
-                userstore.fetchUser();
+                userstore.saveTokenInfo(response.data)
+                    .then(() => {
+                        userstore.fetchUser()
+                            .finally(() => {
+                                this.setLoading(false);
+                            })
+                    })
             })
             .catch((err) => {
                 if (err.response.status == '401') {
@@ -58,7 +67,7 @@ class LoginScreen extends Component<any, any> {
                     console.log(err.response.data);
                 }
             })
-            .finally(() => {
+            .catch(() => {
                 this.setLoading(false);
             })
 

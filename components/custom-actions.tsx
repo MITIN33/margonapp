@@ -14,7 +14,15 @@ import {
     takePictureAsync,
 } from './media-utils'
 
-export default class CustomActions extends React.Component<any, any> {
+export interface ICustomActionProp {
+    onSend: () => { },
+    options: {},
+    renderIcon: null,
+    containerStyle: {},
+    wrapperStyle: {},
+    iconTextStyle: {},
+}
+export default class CustomActions extends React.Component<any, ICustomActionProp> {
     onActionsPress = () => {
         const options = [
             'Choose From Library',
@@ -92,15 +100,6 @@ const styles = StyleSheet.create({
 
 // CustomActions.contextType = {
 //     actionSheet: PropTypes.func,
-// }
-
-// CustomActions.defaultProps = {
-//     onSend: () => { },
-//     options: {},
-//     renderIcon: null,
-//     containerStyle: {},
-//     wrapperStyle: {},
-//     iconTextStyle: {},
 // }
 
 // CustomActions.propType = {

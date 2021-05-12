@@ -17,7 +17,7 @@ export default async function getPermissionAsync(permission) {
           text: "Let's go!",
           onPress: () => Linking.openURL('app-settings:'),
         },
-        { text: 'Nevermind', onPress: () => {}, style: 'cancel' },
+        { text: 'Nevermind', onPress: () => { }, style: 'cancel' },
       ],
       { cancelable: true },
     )
