@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { userstore } from '../stores/UserStore';
-import { View } from 'react-native';
-import { Button, Text } from 'react-native-paper';
+import { Text } from 'react-native';
 import { Container } from '../components/base-components';
+import { Button } from 'react-native-elements';
 
 class ChatHistory extends Component<any, any> {
 
@@ -23,7 +23,7 @@ class ChatHistory extends Component<any, any> {
         return (
             <Container center>
                 <Text>{text}</Text>
-                <Button onPress={userstore.Logout} mode="contained" >Logout</Button>
+                <Button onPress={userstore.Logout} title={"Logout"}></Button>
             </Container>
         );
     }

@@ -10,5 +10,11 @@ export interface UserModel {
     lastName: string,
     profilePicUrl: string,
     phone: string,
-    email: string
+    email: string,
+    userId: string
+}
+
+export interface AuthResponse {
+    expireAt: string,
+    token: string
 }

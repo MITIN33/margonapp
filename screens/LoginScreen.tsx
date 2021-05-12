@@ -1,9 +1,11 @@
 import { observer } from 'mobx-react';
 import React, { Component } from 'react';
-import { View, Image, Alert, Keyboard } from 'react-native';
-import { Text, Button as PaperButton } from 'react-native-paper';
+import { Text, View, Image, Alert, Keyboard, ImageBackground } from 'react-native';
+import { Input, Button } from 'react-native-elements';
+import { color } from 'react-native-elements/dist/helpers';
 import { margonServer } from '../api/axios-instance';
-import { Button, Divider, TextInput } from '../components/base-components';
+import { margonAPI } from '../api/margon-server-api';
+import { Divider } from '../components/base-components';
 import { userstore } from '../stores/UserStore';
 
 @observer
@@ -19,36 +21,43 @@ class LoginScreen extends Component<any, any> {
 
     render() {
         return (
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
-                <Image source={require('../assets/ms_logo.png')} width={30} />
-                <TextInput label="UserName" onChangeText={this.onUserNameChange} mode="outlined" />
-                <TextInput label="Password" secureTextEntry onChangeText={this.onPasswordChange} mode="outlined" />
-                <View style={{ flexDirection: "row", justifyContent: "space-between", width: "100%", paddingTop: 10 }}>
+            <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+                {/* <Input placeholder={"User Name"} onChangeText={this.onUserNameChange} />
+                <View style={{ flexDirection: "row", justifyContent: "space-between", width: "100%" }}>
                     <Text onPress={() => this.props.navigation.navigate("SignUp")}>Register</Text>
                     <Text>Forgot Password</Text>
                 </View>
-
-                <Button title="Login" loading={this.state.isLoading} disabled={this.state.isLoading} onPress={(ev) => this.onLoginClick(ev)} mode={"contained"} />
                 <Divider text="OR" />
-                <Button icon="facebook" mode={"contained"} title="Login via Facebook" />
+                 
+                <Button icon={{ name: "facebook", size: 20, color: "white" }} title="Login via Facebook" /> 
+                */}
+                <Input placeholder={"User Name"} onChangeText={this.onUserNameChange} />
+                <Input placeholder={'Password'} secureTextEntry onChangeText={this.onPasswordChange} />
+                <Button title="Login" loading={this.state.isLoading} disabled={this.state.isLoading} onPress={(ev) => this.onLoginClick(ev)} />
             </View>
         );
     }
-
 
     private onLoginClick = (ev) => {
 
         this.setLoading(true);
         const userLoginRequest = {
             userName: this.state.userName,
-            password: this.state.password
+            password: this.state.password,
+            grantType: 1
         }
 
         console.log('Sending request');
         Keyboard.dismiss();
-        margonServer.post('/auth/token', userLoginRequest)
+        margonAPI.GetToken(userLoginRequest)
             .then((response) => {
-                userstore.saveUserData(response.data);
+                userstore.saveTokenInfo(response.data)
+                    .then(() => {
+                        userstore.fetchUser()
+                            .finally(() => {
+                                this.setLoading(false);
+                            })
+                    })
             })
             .catch((err) => {
                 if (err.response.status == '401') {
@@ -58,7 +67,7 @@ class LoginScreen extends Component<any, any> {
                     console.log(err.response.data);
                 }
             })
-            .finally(() => {
+            .catch(() => {
                 this.setLoading(false);
             })
 

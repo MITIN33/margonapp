@@ -2,11 +2,16 @@
   "name": "MargonChat",
   "displayName": "MargonChat",
   "expo": {
-    "name": "MargonChat",
-    "slug": "MargonChat",
+    "name": "Margon",
+    "slug": "Margon",
+    "icon": "./assets/chat-icon.png",
     "version": "1.0.0",
     "assetBundlePatterns": [
       "**/*"
-    ]
+    ],
+    "android": {
+      "package": "com.margon.chat",
+      "versionCode": 1
+    }
   }
 }

@@ -4,6 +4,7 @@ import { Text } from 'react-native-paper';
 import { Button, Container, TextInput } from '../components/base-components';
 import { margonServer } from "../api/axios-instance";
 import { Keyboard } from "react-native";
+import { margonAPI } from "../api/margon-server-api";
 
 class SignupScreen extends Component<any, any>{
 
@@ -28,7 +29,8 @@ class SignupScreen extends Component<any, any>{
                 lastName: this.state.lastName,
                 password: 'password'
             }
-            margonServer.post('/auth/signup', user)
+
+            var repsonse = margonAPI.SignUp(user)
                 .then((res) => console.log(res.data))
                 .catch(err => {
                     if (err.response) {
