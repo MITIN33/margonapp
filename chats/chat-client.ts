@@ -1,58 +1,61 @@
 
 import * as signalR from '@microsoft/signalr';
-import { asyncStorage } from '../models/async-storage';
-// import { userstore } from '../stores/UserStore';
+import { ToastAndroid } from 'react-native';
+import { IMargonChatMessage } from '../models/chat-models';
+import { authStore } from '../stores/AuthStore';
 
 const chatHubUrl = "http://margonserver.azurewebsites.net/chatHub";
 
+const connection: signalR.HubConnection = new signalR.HubConnectionBuilder()
+    .withUrl(chatHubUrl, { accessTokenFactory: () => authStore.Token() })
+    .withAutomaticReconnect()
+    .configureLogging(signalR.LogLevel.Error)
+    .build();
 
+connection.on("ReceiveError", (error, stackTrace) => {
+    console.log("Received message from server: " + error);
+});
 
+connection.onreconnecting(() => {
+    ToastAndroid.show("You are offline", ToastAndroid.LONG);
+})
+
+connection.onreconnected(() => {
+    ToastAndroid.show("Back online", ToastAndroid.LONG);
+})
 class ChatHubclient {
 
-    public connection: signalR.HubConnection;
+    public onMessageReceiveFunc: (message: IMargonChatMessage) => void;
+    public onMessageReceiveHomeFunc: (message: IMargonChatMessage) => void;
 
     public sendMessage(toUserId, senderUserId, message) {
-        return this.connection.invoke("SendMessage", toUserId, senderUserId, message)
+        // console.log("Message sending:" + JSON.stringify(message));
+        return connection.invoke("SendMessage", toUserId, senderUserId, message)
     }
 
-    public onMessageReceive(onReceive) {
-        this.connection.on("ReceiveMessage", (userId, message) => {
-            onReceive(userId, message);
-        });
+    public async stetupConnection() {
 
-        this.connection.on("ReceiveError", (userId, message) => {
-            console.log("Receive error from signalR: " + message);
-        });
-    }
-
-    public async createConnection(userId, authtoken) {
-
-        console.log("Connection SignalR:" + this.connection);
-        if (this.connection && this.connection.state === signalR.HubConnectionState.Connected) {
-            return;
-        }
-
-        this.connection = new signalR.HubConnectionBuilder()
-            .withUrl(chatHubUrl, { accessTokenFactory: () => authtoken })
-            .withAutomaticReconnect()
-            .configureLogging(signalR.LogLevel.Information)
-            .build();
-
-        this.connection.onclose(() => {
-            console.log("Connection closed");
-        })
-
-        try {
-            await this.connection.start();
-
-            if (this.connection.connectionId) {
-                asyncStorage.saveData("CHAT_CONNECTIONID", this.connection.connectionId);
+        if (connection.state === signalR.HubConnectionState.Disconnected) {
+            try {
+                await connection.start();
+                this.registerEvents(connection);
+            } catch (error) {
+                console.log("Error in establishing hub connection, retrying again.")
             }
-            console.log("Connection Id : " + this.connection.connectionId);
-        } catch (error) {
-            console.log("Error in creation websocket connection: " + error.message)
         }
+        else {
+            console.log("CONNECTION ID: ALready active: " + connection.connectionId);
+        }
+    }
 
+    private registerEvents(connection: signalR.HubConnection) {
+        connection.on("ReceiveMessage", (userId, message) => {
+            console.log("Received message from server: " + message.message);
+            if (this.onMessageReceiveFunc)
+                this.onMessageReceiveFunc(message);
+            if (this.onMessageReceiveHomeFunc)
+                this.onMessageReceiveHomeFunc(message);
+        });
     }
 }
 

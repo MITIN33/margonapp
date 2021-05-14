@@ -8,8 +8,18 @@ import { userstore } from '../stores/UserStore';
 import { chatHubClient } from '../chats/chat-client';
 import { margonAPI } from '../api/margon-server-api';
 import { Alert, ToastAndroid, View, Text } from 'react-native';
+import { authStore } from '../stores/AuthStore';
 
 class TabNavigation extends Component {
+
+
+    constructor(props) {
+        super(props)
+    }
+
+    componentDidMount() {
+        chatHubClient.stetupConnection()
+    }
 
     render() {
 

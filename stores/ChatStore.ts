@@ -1,6 +1,6 @@
 import { action, makeAutoObservable, makeObservable, observable } from "mobx";
 import { margonAPI } from "../api/margon-server-api";
-import { IDialogs } from "../models/chat-models";
+import { IDialogs, IMargonChatMessage, ScreenName } from "../models/chat-models";
 
 class ChatStore {
 
@@ -9,6 +9,9 @@ class ChatStore {
 
     @observable
     public isDialogsLoading = true;
+
+    public messageForDialogs: Map<string, IMargonChatMessage[]>
+    private chatContinuationToken: string
 
     /**
      *
@@ -21,7 +24,7 @@ class ChatStore {
         this.setIsDialogLoading(true);
         margonAPI.Dialogs().then((response) => {
             if (response.data) {
-                this.loadData(response.data['items']);
+                this.setDialogList(response.data['items']);
             }
         }).finally(() => {
             this.setIsDialogLoading(false);
@@ -34,60 +37,49 @@ class ChatStore {
     }
 
     @action
-    public setDialogs(value) {
+    public setDialogList(value) {
         this.dialogs = value;
-    };
+    }
 
     @action
-    public updateDialogWithId(dialogObj: IDialogs, text) {
-        this.dialogs.map(x=>{
-            if(x.dialogId == dialogObj.dialogId){
-                x.lastMessage = text,
-                x.lastMessageDateSent = this.getDate(Date.now()),
-                x.unreadMessageCount = 0
+    public updateDialogWithMessage(chatMessage: IMargonChatMessage, screenName: ScreenName) {
+        this.dialogs.map(x => {
+            if (x.dialogId == chatMessage.dialogId) {
+                x.lastMessage = chatMessage.message
+                x.lastMessageDateSent = Date.now()
+                x.unreadMessageCount = screenName === ScreenName.ChatScreen ? 0 : x.unreadMessageCount + 1
             }
         })
     };
 
+    public async loadChatMessagesForDialogId(dialogId: string) {
 
-    private loadData = (dialogs: IDialogs[]) => {
-        let list = []
-        dialogs.map((val, key) => {
-            list.push({
-                userId: val.userId,
-                otherUserId: val.otherUserId,
-                dialogId: val.dialogId,
-                name: val.name,
-                photoUrl: val.photoUrl,
-                lastMessage: val.lastMessage,
-                lastMessageDateSent: this.getDate(val.lastMessageDateSent),
-                unreadMessageCount: val.unreadMessageCount
-            });
-        });
-
-        this.dialogs = list;
-    }
-
-    private getDate(epchTime) {
-        var d = new Date(0); // The 0 there is the key, which sets the date to the epoch
-        d.setUTCMilliseconds(epchTime);
-
-        let currentDate = Date.now()
-        if (Math.abs(currentDate - epchTime) > 86400000) {
-            return d.toLocaleDateString();
+        try {
+            var response = await margonAPI.GetChatList(dialogId, null)
+            let messages = [];
+            if (response.data) {
+                messages = response.data['items'];
+                this.chatContinuationToken = response.data['continuationToken'];
+            }
+            return messages;
+        } catch (error) {
+            throw error;
         }
-        return this.dateTOAMORPM(d);
     }
 
-    private dateTOAMORPM(currentDateTime) {
-        var hrs = currentDateTime.getHours();
-        var mnts = currentDateTime.getMinutes();
-        var AMPM = hrs >= 12 ? 'PM' : 'AM';
-        hrs = hrs % 12;
-        hrs = hrs ? hrs : 12;
-        mnts = mnts < 10 ? '0' + mnts : mnts;
-        var result = hrs + ':' + mnts + ' ' + AMPM;
-        return result;
+    public async loadEarlierChatMessagesForDialogId(dialogId: string) {
+
+        try {
+            var response = await margonAPI.GetChatList(dialogId, this.chatContinuationToken)
+            let messages = [];
+            if (response.data) {
+                messages = response.data['items'];
+                this.chatContinuationToken = response.data['continuationToken'];
+            }
+            return messages;
+        } catch (error) {
+            throw error;
+        }
     }
 }
 

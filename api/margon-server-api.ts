@@ -1,19 +1,15 @@
-import { IChatMessage, IMessage } from "react-native-gifted-chat";
-import { chatHubClient } from "../chats/chat-client";
-import { IAttachments, IChatRequest, MediaType } from "../models/chat-models";
-import { userstore } from "../stores/UserStore";
+import { authStore } from "../stores/AuthStore";
 import { margonServer } from "./axios-instance";
 
 class MargonAPI {
 
-    public authToken: string;
-
     public async Me() {
-        var response = await margonServer.get('/me', { headers: { 'Authorization': `Bearer ${this.authToken}` } });
+        var authtoken = await authStore.Token();
+        var response = await margonServer.get('/me', { headers: { 'Authorization': `Bearer ${authtoken}` } });
         return response;
     }
 
-    public async GetToken(userLoginRequest) {
+    public async Login(userLoginRequest) {
         var response = await margonServer.post('/auth/token', userLoginRequest);
         return response;
     }
@@ -24,43 +20,16 @@ class MargonAPI {
     }
 
     public async Dialogs() {
-        var response = await margonServer.get('/dialogs', { headers: { 'Authorization': `Bearer ${this.authToken}` } });
+        var authtoken = await authStore.Token();
+        var response = await margonServer.get('/dialogs', { params: { limit: 10 }, headers: { 'Authorization': `Bearer ${authtoken}` } });
         return response;
     }
 
-    public async GetChatList(dialogId: string) {
-        var response = await margonServer.get(`/dialogs/${dialogId}/chats?limit=10`, { headers: { 'Authorization': `Bearer ${this.authToken}` } });
+    public async GetChatList(dialogId: string, continuationToken: string) {
+        var authtoken = await authStore.Token();
+        var response = await margonServer.get(`/dialogs/${dialogId}/chats`, { params: { limit: 10, continuationToken }, headers: { 'Authorization': `Bearer ${authtoken}` } });
         return response;
     }
-
-    public async SendMessage(toUserId: string, fromUserId, message: IMessage, dialogId: string) {
-        let chatRequest: IChatRequest;
-        chatRequest = {
-            message: message.text,
-            dialogId: dialogId,
-            dateSent: Date.now(),
-            attachments: this.getAttachments(message),
-        }
-        try {
-            var response = await chatHubClient.sendMessage(toUserId, fromUserId, chatRequest);
-            return response;
-        }
-        catch (ex) {
-            throw ex;
-        }
-    }
-
-    private getAttachments(message: IChatMessage): IAttachments {
-        let attachments: IAttachments;
-        if (message.image) {
-            attachments.id = '123';
-            attachments.type = MediaType.Image;
-            attachments.url = "https://bloblstorage.azurewebsite.net/image123.jpg";
-            return attachments;
-        }
-        return null;
-    }
-
 }
 
 

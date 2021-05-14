@@ -1,6 +1,6 @@
 import { View, Platform, ActivityIndicator, Text } from "react-native";
 import React from "react";
-import { Bubble, GiftedChat, IMessage, Send } from "react-native-gifted-chat";
+import { Bubble, GiftedChat, IChatMessage, IMessage, Send } from "react-native-gifted-chat";
 import CustomActions from '../components/custom-actions';
 import { Avatar, Image } from 'react-native-elements';
 import { StatusBar } from "react-native";
@@ -13,14 +13,9 @@ import AppTheme from "../theme/AppTheme";
 import { margonAPI } from "../api/margon-server-api";
 import { userstore } from "../stores/UserStore";
 import { chatHubClient } from "../chats/chat-client";
-import { IChatRequest, IDialogs } from "../models/chat-models";
+import { IAttachments, IChatRequest, IDialogs, IMargonChatMessage, MediaType, ScreenName } from "../models/chat-models";
 import { chatStore } from "../stores/ChatStore";
-
-
-
-const filterBotMessages = message =>
-    !message.system && message.user && message.user._id && message.user._id === 2
-const findStep = step => message => message._id === step
+import message from "../api/message";
 
 class ChatScreen extends React.Component<any, any> {
 
@@ -28,8 +23,7 @@ class ChatScreen extends React.Component<any, any> {
     private _isMounted = false
 
     otherUser;
-    photoUrl;
-    name;
+    user;
     selectedDialog: IDialogs;
 
     constructor(props) {
@@ -43,9 +37,11 @@ class ChatScreen extends React.Component<any, any> {
             name: this.selectedDialog.name,
             avatar: this.selectedDialog.photoUrl
         }
-
-        chatHubClient.onMessageReceive(this.onReceive);
-
+        this.user = {
+            _id: userstore.user.userId,
+            name: userstore.user.firstName,
+            avatar: userstore.user.profilePicUrl
+        }
         this.state = {
             inverted: false,
             step: 0,
@@ -62,25 +58,27 @@ class ChatScreen extends React.Component<any, any> {
 
     componentWillUnmount() {
         this._isMounted = false
+        chatHubClient.onMessageReceiveFunc = null;
     }
 
     componentDidMount() {
         this._isMounted = true
+        chatHubClient.onMessageReceiveFunc = this.onReceive;
+        this.props.navigation.setOptions({ headerTitle: this.selectedDialog.name });
 
-        margonAPI.GetChatList(this.selectedDialog.dialogId)
+        chatStore.loadChatMessagesForDialogId(this.selectedDialog.dialogId)
             .then((response) => {
-                let messages = [];
-                if (response.data) {
-                    messages = this.loadMessages(response.data['items']);
+                if (this._isMounted) {
+                    let messages = [];
+                    messages = this.loadMessages(response);
+                    // init with only system messages
+                    this.setState({
+                        messages: messages, // messagesData.filter(message => message.system),
+                        appIsReady: true,
+                        isTyping: false,
+                        isLoading: false
+                    })
                 }
-                response.data['items']
-                // init with only system messages
-                this.setState({
-                    messages: messages, // messagesData.filter(message => message.system),
-                    appIsReady: true,
-                    isTyping: false,
-                    isLoading: false
-                })
             })
             .catch((e) => console.log(e.message));
 
@@ -94,11 +92,9 @@ class ChatScreen extends React.Component<any, any> {
                 _id: val.id,
                 createdAt: val.dateSent,
                 text: val.message,
-                user: {
-                    _id: val.userId,
-                    name: this.name,
-                    avatar: this.photoUrl
-                }
+                user: val.userId === this.user._id ? this.user : this.otherUser,
+                sent: true,
+                received: true
             })
         });
 
@@ -111,30 +107,40 @@ class ChatScreen extends React.Component<any, any> {
                 isLoadingEarlier: true,
             }
         })
-
-        setTimeout(() => {
-            if (this._isMounted === true) {
+        chatStore.loadEarlierChatMessagesForDialogId(this.selectedDialog.dialogId)
+            .then((response) => {
+                let messages = [];
+                messages = this.loadMessages(response);
+                // init with only system messages
                 this.setState((previousState: any) => {
                     return {
                         messages: GiftedChat.prepend(
                             previousState.messages,
-                            earlierMessages() as IMessage[],
+                            messages,
                             Platform.OS !== 'web',
                         ),
-                        loadEarlier: true,
                         isLoadingEarlier: false,
+                        loadEarlier: true
                     }
                 })
-            }
-        }, 1000) // simulating network
+            })
+            .catch((e) => console.log(e.message));
     }
 
 
     onSend = (messages: IMessage[] = []) => {
         const step = this.state.step + 1
-        margonAPI.SendMessage(this.otherUser._id, userstore.user.userId, messages[0], this.selectedDialog.dialogId)
+
+        const chatMessage: IMargonChatMessage = {
+            message: messages[0].text,
+            dialogId: this.selectedDialog.dialogId,
+            dateSent: Date.now(),
+            attachments: this.getAttachments(messages[0]),
+            userId: this.user._id
+        }
+        chatHubClient.sendMessage(this.otherUser._id, userstore.user.userId, chatMessage)
             .then(() => {
-                chatStore.updateDialogWithId(this.selectedDialog, messages[0].text)
+                chatStore.updateDialogWithMessage(chatMessage, ScreenName.ChatScreen)
                 this.setState((previousState: any) => {
                     const sentMessages = [{ ...messages[0], sent: true, received: false }]
                     return {
@@ -146,39 +152,36 @@ class ChatScreen extends React.Component<any, any> {
                         step,
                     }
                 })
-            }).catch((e) => console.error(e.message));
-
-        //for demo purpose
-        //setTimeout(() => this.botSend(step), 1000)
+            })
+            .catch((e) => {
+                console.error(e.message);
+            })
     }
 
-    botSend = (step = 0) => {
-        const newMessage = (messagesData as IMessage[])
-            .reverse()
-            //.filter(filterBotMessages)
-            .find(findStep(step))
-        if (newMessage) {
-            this.setState((previousState: any) => ({
-                messages: GiftedChat.append(
-                    previousState.messages,
-                    [newMessage],
-                    Platform.OS !== 'web',
-                ),
-            }))
+    private getAttachments(message: IChatMessage): IAttachments {
+        let attachments: IAttachments;
+        if (message.image) {
+            attachments.id = '123';
+            attachments.type = MediaType.Image;
+            attachments.url = "https://bloblstorage.azurewebsite.net/image123.jpg";
+            return attachments;
         }
+        return null;
     }
 
-    onReceive = (userId: string, message) => {
+    onReceive = (message: IMargonChatMessage) => {
         this.setState((previousState: any) => {
             return {
                 messages: GiftedChat.append(
                     previousState.messages as any,
                     [
                         {
-                            _id: Math.abs(Math.random() * 10000),
+                            _id: message.id,
                             text: message.message,
                             createdAt: new Date(),
                             user: this.otherUser,
+                            sent: true,
+                            received: true
                         },
                     ],
                     Platform.OS !== 'web',

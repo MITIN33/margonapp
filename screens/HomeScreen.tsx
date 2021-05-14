@@ -1,16 +1,14 @@
 import { observer } from 'mobx-react';
 import React, { Component } from 'react';
-import { ActivityIndicator, LogBox, Platform, RefreshControl } from 'react-native';
+import { LogBox, Platform, RefreshControl } from 'react-native';
 import { StatusBar } from 'react-native';
 import { View, StyleSheet } from 'react-native';
-import { Avatar, ListItem, Image, Text, Badge } from 'react-native-elements';
+import { Avatar, ListItem, Text, Badge } from 'react-native-elements';
 import { Icon } from 'react-native-elements';
 import { ScrollView } from 'react-native-gesture-handler';
-import { margonAPI } from '../api/margon-server-api';
 import { chatHubClient } from '../chats/chat-client';
-import { IDialogs } from '../models/chat-models';
+import { IMargonChatMessage, ScreenName } from '../models/chat-models';
 import { chatStore } from '../stores/ChatStore';
-import { userstore } from '../stores/UserStore';
 
 const access = () => <Icon name='ellipsis-vertical-outline' type='ionicon' />;
 
@@ -18,6 +16,7 @@ const access = () => <Icon name='ellipsis-vertical-outline' type='ionicon' />;
 class HomeScreen extends Component<any, any> {
 
     private list: any = [];
+    _isMounted: boolean;
 
     constructor(props) {
         super(props);
@@ -31,52 +30,22 @@ class HomeScreen extends Component<any, any> {
 
     componentDidMount() {
         chatStore.loadDialogs();
+        chatHubClient.onMessageReceiveHomeFunc = this.onMessageReceive;
     }
 
-    // loadData = (dialogs: IDialogs[]) => {
-    //     this.list = [];
-    //     dialogs.map((val, key) => {
-    //         this.list.push({
-    //             userId: val.userId,
-    //             otherUserId: val.otherUserId,
-    //             dialogId: val.dialogId,
-    //             name: val.name,
-    //             avatar_url: val.photoUrl,
-    //             short_text: val.lastMessage,
-    //             time: this.getDate(val.lastMessageDateSent),
-    //             unreadMessageCnt: val.unreadMessageCount
-    //         });
-    //     });
-    // }
-
-    // // getDate(epchTime) {
-    // //     var d = new Date(0); // The 0 there is the key, which sets the date to the epoch
-    // //     d.setUTCMilliseconds(epchTime);
-
-    // //     let currentDate = Date.now()
-    // //     if(Math.abs(currentDate - epchTime) > 86400000){
-    // //         return d.toLocaleDateString();
-    // //     }
-    // //     return this.dateTOAMORPM(d);
-    // // }
-
-    // // dateTOAMORPM(currentDateTime) {
-    // //     var hrs = currentDateTime.getHours();
-    // //     var mnts = currentDateTime.getMinutes();
-    // //     var AMPM = hrs >= 12 ? 'PM' : 'AM';
-    // //     hrs = hrs % 12;
-    // //     hrs = hrs ? hrs : 12;
-    // //     mnts = mnts < 10 ? '0' + mnts : mnts;
-    // //     var result = hrs + ':' + mnts + ' ' + AMPM;
-    // //     return result;
-    // //  }
+    componentWillUnmount() {
+        chatHubClient.onMessageReceiveHomeFunc = null;
+    }
 
     onRefresh = () => {
         chatStore.loadDialogs();
     }
 
-    render() {
+    onMessageReceive(message: IMargonChatMessage) {
+        chatStore.updateDialogWithMessage(message, ScreenName.HomeScreen);
+    }
 
+    render() {
         if (chatStore.isDialogsLoading) {
             return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><Text>Loading...</Text></View>
         }
@@ -104,7 +73,7 @@ class HomeScreen extends Component<any, any> {
                                 </ListItem.Content>
                                 <View style={{ justifyContent: 'flex-end' }}>
                                     {l.unreadMessageCount !== 0 ? <Badge value={l.unreadMessageCount} /> : null}
-                                    <Text style={styles.ratingText}>{l.lastMessageDateSent}</Text>
+                                    <Text style={styles.ratingText}>{this.getDate(l.lastMessageDateSent)}</Text>
                                 </View>
                             </ListItem>
                         ))
@@ -113,6 +82,28 @@ class HomeScreen extends Component<any, any> {
             </ ScrollView>
 
         );
+    }
+
+    private getDate(epchTime) {
+        var d = new Date(0); // The 0 there is the key, which sets the date to the epoch
+        d.setUTCMilliseconds(epchTime);
+
+        let currentDate = Date.now()
+        if (Math.abs(currentDate - epchTime) > 86400000) {
+            return d.toLocaleDateString();
+        }
+        return this.dateTOAMORPM(d);
+    }
+
+    private dateTOAMORPM(currentDateTime) {
+        var hrs = currentDateTime.getHours();
+        var mnts = currentDateTime.getMinutes();
+        var AMPM = hrs >= 12 ? 'PM' : 'AM';
+        hrs = hrs % 12;
+        hrs = hrs ? hrs : 12;
+        mnts = mnts < 10 ? '0' + mnts : mnts;
+        var result = hrs + ':' + mnts + ' ' + AMPM;
+        return result;
     }
 }
 

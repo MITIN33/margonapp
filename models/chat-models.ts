@@ -4,14 +4,14 @@ export interface IDialogs {
     name: string,
     photoUrl: string,
     lastMessage: string,
-    lastMessageDateSent: string,
+    lastMessageDateSent: number,
     unreadMessageCount: number,
     userId: string,
     otherUserId: string
 }
 
 
-export interface IChatResponse{
+export interface IChatResponse {
     userId: string,
     message: string,
     dialogId: string,
@@ -22,7 +22,7 @@ export interface IChatResponse{
     id: string
 }
 
-export interface IChatRequest{
+export interface IChatRequest {
     message: string,
     dialogId: string,
     dateSent: number,
@@ -30,14 +30,35 @@ export interface IChatRequest{
 }
 
 
-export interface IAttachments{
+export interface IAttachments {
     id: string,
     url: string,
     type: MediaType
 }
 
+export interface IAuthResponse {
+    token: string,
+    refreshToken: string,
+    expiresAt: number
+}
+
+export interface IMargonChatMessage {
+    id?: string,
+    userId: string,
+    message: string,
+    dialogId: string,
+    readUserIds?: string,
+    deliveredUserIds?: string,
+    dateSent: number,
+    attachments: IAttachments,
+}
 
 export enum MediaType {
     Image,
     Video
+}
+
+export enum ScreenName {
+    HomeScreen,
+    ChatScreen
 }
