@@ -1,5 +1,8 @@
+import { Provider } from 'mobx-react';
 import React, { Component } from 'react';
-import { Container } from '../components/base-components';
+import { View } from 'react-native';
+import { Menu } from 'react-native-paper';
+import { Button, Container, Divider } from '../components/base-components';
 
 class StatusScreen extends Component<any, any> {
 
@@ -13,9 +16,9 @@ class StatusScreen extends Component<any, any> {
 
     render() {
         return (
-            <Container center>
-               
-            </Container>
+                <Container>
+                    
+                </Container>
         );
     }
 }

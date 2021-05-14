@@ -5,6 +5,7 @@ import React, { Component } from "react";
 import LoginScreen from "../screens/LoginScreen";
 import { userstore } from "../stores/UserStore";
 import TabNavigation from "../screens/TabNavigation";
+import SettingsScreen from "../screens/SettingsScreen";
 import { KeyboardAvoidingView, Platform, StatusBar, View } from "react-native";
 import SignupScreen from "../screens/SignUpScreen";
 import ChatScreen from "../screens/ChatScreen";
@@ -14,6 +15,7 @@ import { Icon } from "react-native-elements";
 import GetStartedScreen from "../screens/GetStartedScreen";
 import VerificationScreen from "../screens/VerificationScreen";
 import { authStore } from "../stores/AuthStore";
+import { Button } from 'react-native-elements';
 
 const Stack = createStackNavigator();
 
@@ -23,7 +25,7 @@ class AppNavigator extends Component<any, any> {
     constructor(props) {
         super(props);
         this.state = {
-            isLoading: true
+            isLoading: true,
         }
     }
 
@@ -33,11 +35,12 @@ class AppNavigator extends Component<any, any> {
     }
 
     render() {
-
+        console.log(this.state.visible);
         if (this.state.isLoading) {
             return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><ActivityIndicator /></View>
         }
         const firstName = userstore.user?.firstName;
+        const { visible } = this.state;
         return (
 
             <KeyboardAvoidingView
@@ -48,19 +51,32 @@ class AppNavigator extends Component<any, any> {
                         {authStore.isUserSigned ?
                             (
                                 <>
-                                    <Stack.Screen name="Home" component={TabNavigation} options={{
+                                    <Stack.Screen name="Home" component={TabNavigation} options={({ navigation }) => ({
                                         title: firstName,
                                         headerShown: true,
-                                        headerLeft: () => (<Icon name='person-circle-outline' size={30} type='ionicon' style={{ marginLeft: 15 }} />),
-                                        headerRight: () => (<Icon name='ellipsis-vertical-outline' type='ionicon' />),
+                                        headerLeft: () => (
+                                            <Icon name='person-circle-outline' size={30} type='ionicon' style={{ marginLeft: 15 }} />),
+                                        headerRight: () => (
+                                            <Button
+                                                type='clear'
+                                                icon={<Icon name='options-outline' size={20} type='ionicon' style={{ marginLeft: 15 }} />}
+                                                onPress={() => navigation.navigate('Settings')} />
+                                        ),
                                         headerStyle: headerStyle
-                                    }} />
+                                    })} />
                                     <Stack.Screen name="Chat" component={ChatScreen} options={{
                                         title: 'Chat',
                                         headerShown: true,
-                                        headerRight: () => (<Icon name='ellipsis-vertical-outline' type='ionicon' />),
+                                        headerRight: () => (
+                                            <Icon name='ellipsis-vertical-outline' type='ionicon' />
+                                        ),
                                         headerStyle: headerStyle
                                     }} />
+                                    <Stack.Screen name="Settings" component={SettingsScreen} options={{
+                                        title: 'Settings',
+                                        headerShown: true,
+                                        headerStyle: headerStyle
+                                    }}/>
                                 </>
                             ) :
                             (

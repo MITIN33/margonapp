@@ -22,7 +22,8 @@ class HomeScreen extends Component<any, any> {
         super(props);
         if (Platform.OS !== 'ios')
             StatusBar.setBackgroundColor('#71afe5');
-        LogBox.ignoreLogs(['Setting a timer']);
+        if(Platform.OS !== 'web')
+            LogBox.ignoreLogs(['Setting a timer']);
         this.state = {
             isLoading: true
         }
