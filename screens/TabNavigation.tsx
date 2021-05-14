@@ -27,10 +27,10 @@ class TabNavigation extends Component {
 
         return (
             <>
-                <Tab.Navigator initialRouteName='Online' tabBarOptions={{ style: { backgroundColor: AppTheme.colors.themeColor } }}>
+                <Tab.Navigator initialRouteName='Chats' tabBarOptions={{ style: { backgroundColor: AppTheme.colors.themeColor } }}>
                     <Tab.Screen name="Status" component={StatusScreen} />
-                    <Tab.Screen name="Online" component={HomeScreen} />
-                    <Tab.Screen name="Chats" component={ChatHistory} />
+                    <Tab.Screen name="Online" component={ChatHistory} />
+                    <Tab.Screen name="Chats" component={HomeScreen} />
                 </Tab.Navigator>
             </>
         );
