@@ -2,16 +2,16 @@ import AsyncStorage from "@react-native-async-storage/async-storage"
 
 class AsyncStorageHelper {
 
-    public saveData(key, value) {
+    public async saveData(key, value) {
         if (value) {
-            AsyncStorage.setItem(key, JSON.stringify(value), (err) => {
+            await AsyncStorage.setItem(key, JSON.stringify(value), (err) => {
                 if (err) {
                     console.log("an error");
                     throw err;
                 }
                 console.log('Successfully saved data in local store for ' + key);
             }).catch((err) => {
-                console.log("error is: " + err);
+                console.log(`Error in saving data to store [${key}]: ${err}`);
             });
         }
     }

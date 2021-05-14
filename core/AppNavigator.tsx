@@ -13,6 +13,7 @@ import AppTheme from "../theme/AppTheme";
 import { Icon } from "react-native-elements";
 import GetStartedScreen from "../screens/GetStartedScreen";
 import VerificationScreen from "../screens/VerificationScreen";
+import { authStore } from "../stores/AuthStore";
 
 const Stack = createStackNavigator();
 
@@ -37,7 +38,6 @@ class AppNavigator extends Component<any, any> {
             return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><ActivityIndicator /></View>
         }
         const firstName = userstore.user?.firstName;
-
         return (
 
             <KeyboardAvoidingView
@@ -45,7 +45,7 @@ class AppNavigator extends Component<any, any> {
                 behavior={Platform.OS === "ios" ? "padding" : "height"}>
                 <NavigationContainer>
                     <Stack.Navigator screenOptions={{ headerShown: false }}>
-                        {userstore.isUserSigned ?
+                        {authStore.isUserSigned ?
                             (
                                 <>
                                     <Stack.Screen name="Home" component={TabNavigation} options={{

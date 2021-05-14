@@ -49,14 +49,11 @@ class LoginScreen extends Component<any, any> {
 
         console.log('Sending request');
         Keyboard.dismiss();
-        margonAPI.GetToken(userLoginRequest)
+        margonAPI.Login(userLoginRequest)
             .then((response) => {
-                userstore.saveTokenInfo(response.data)
-                    .then(() => {
-                        userstore.fetchUser()
-                            .finally(() => {
-                                this.setLoading(false);
-                            })
+                userstore.setLoginData(response.data)
+                    .finally(() => {
+                        this.setLoading(false);
                     })
             })
             .catch((err) => {
