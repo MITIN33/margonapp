@@ -7,7 +7,8 @@ export interface IDialogs {
     lastMessageDateSent: number,
     unreadMessageCount: number,
     userId: string,
-    otherUserId: string
+    otherUserId: string,
+    isUserOnline: boolean
 }
 
 

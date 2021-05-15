@@ -4,11 +4,7 @@ import HomeScreen from './HomeScreen';
 import ChatHistory from './ChatHistory';
 import AppTheme from '../theme/AppTheme';
 import StatusScreen from './StatusScreen';
-import { userstore } from '../stores/UserStore';
 import { chatHubClient } from '../chats/chat-client';
-import { margonAPI } from '../api/margon-server-api';
-import { Alert, ToastAndroid, View, Text } from 'react-native';
-import { authStore } from '../stores/AuthStore';
 
 class TabNavigation extends Component {
 

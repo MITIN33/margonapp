@@ -42,10 +42,9 @@ class AppNavigator extends Component<any, any> {
         const firstName = userstore.user?.firstName;
         const { visible } = this.state;
         return (
-
-            <KeyboardAvoidingView
-                style={{ flex: 1, flexDirection: 'column', justifyContent: 'center' }}
-                behavior={Platform.OS === "ios" ? "padding" : "height"}>
+            // <KeyboardAvoidingView
+            //     style={{ flex: 1, flexDirection: 'column', justifyContent: 'center' }}
+            //     behavior={Platform.OS === "ios" ? "padding" : "height"}>
                 <NavigationContainer>
                     <Stack.Navigator screenOptions={{ headerShown: false }}>
                         {authStore.isUserSigned ?
@@ -89,7 +88,6 @@ class AppNavigator extends Component<any, any> {
                             )}
                     </Stack.Navigator>
                 </NavigationContainer>
-            </KeyboardAvoidingView >
         );
     };
 }

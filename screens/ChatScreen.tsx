@@ -1,21 +1,16 @@
-import { View, Platform, ActivityIndicator, Text } from "react-native";
+import { View, Platform, ActivityIndicator, Text, KeyboardAvoidingView } from "react-native";
 import React from "react";
 import { Bubble, GiftedChat, IChatMessage, IMessage, Send } from "react-native-gifted-chat";
-import CustomActions from '../components/custom-actions';
 import { Avatar, Image } from 'react-native-elements';
 import { StatusBar } from "react-native";
 import { MaterialIcons } from '@expo/vector-icons'
-import messagesData from '../api/message';
-import earlierMessages from '../api/earlierMessages';
 import AccessoryBar from "../components/accessory-bar";
 import CustomView from "../components/custom-view";
 import AppTheme from "../theme/AppTheme";
-import { margonAPI } from "../api/margon-server-api";
 import { userstore } from "../stores/UserStore";
 import { chatHubClient } from "../chats/chat-client";
-import { IAttachments, IChatRequest, IDialogs, IMargonChatMessage, MediaType, ScreenName } from "../models/chat-models";
+import { IAttachments, IDialogs, IMargonChatMessage, MediaType, ScreenName } from "../models/chat-models";
 import { chatStore } from "../stores/ChatStore";
-import message from "../api/message";
 
 class ChatScreen extends React.Component<any, any> {
 
@@ -73,7 +68,7 @@ class ChatScreen extends React.Component<any, any> {
                     messages = this.loadMessages(response);
                     // init with only system messages
                     this.setState({
-                        messages: messages, // messagesData.filter(message => message.system),
+                        messages: messages,
                         appIsReady: true,
                         isTyping: false,
                         isLoading: false
@@ -129,29 +124,38 @@ class ChatScreen extends React.Component<any, any> {
 
 
     onSend = (messages: IMessage[] = []) => {
-        const step = this.state.step + 1
 
         const chatMessage: IMargonChatMessage = {
             message: messages[0].text,
             dialogId: this.selectedDialog.dialogId,
             dateSent: Date.now(),
             attachments: this.getAttachments(messages[0]),
-            userId: this.user._id
+            userId: this.user._id,
         }
+        const messageId = Date.now()
+        this.setState((previousState: any) => {
+            const sentMessages = [{ ...messages[0], _id: messageId, pending: true }]
+            return {
+                messages: GiftedChat.append(
+                    previousState.messages,
+                    sentMessages,
+                    Platform.OS !== 'web',
+                )
+            }
+        })
+
         chatHubClient.sendMessage(this.otherUser._id, userstore.user.userId, chatMessage)
             .then(() => {
                 chatStore.updateDialogWithMessage(chatMessage, ScreenName.ChatScreen)
-                this.setState((previousState: any) => {
-                    const sentMessages = [{ ...messages[0], sent: true, received: false }]
-                    return {
-                        messages: GiftedChat.append(
-                            previousState.messages,
-                            sentMessages,
-                            Platform.OS !== 'web',
-                        ),
-                        step,
+                const list = this.state.messages
+                list.map((x: IMessage, i) => {
+                    if (x._id === messageId) {
+                        x.pending = false
+                        x.sent = true
+                        x.received = true
                     }
                 })
+                this.setState({ messages: list });
             })
             .catch((e) => {
                 console.error(e.message);
@@ -170,6 +174,7 @@ class ChatScreen extends React.Component<any, any> {
     }
 
     onReceive = (message: IMargonChatMessage) => {
+        // console.log("Message on chat scree:" + JSON.stringify(message))
         this.setState((previousState: any) => {
             return {
                 messages: GiftedChat.append(
@@ -188,6 +193,10 @@ class ChatScreen extends React.Component<any, any> {
                 ),
             }
         })
+    }
+
+    onChatRead = (dialogId: string) => {
+
     }
 
     renderMessageImage = (props) => {
@@ -246,7 +255,7 @@ class ChatScreen extends React.Component<any, any> {
 
     renderSend = (props: Send['props']) => (
         <Send {...props} containerStyle={{ justifyContent: 'center' }}>
-            <MaterialIcons size={30} color={'tomato'} name={'send'} />
+            <MaterialIcons size={30} color={AppTheme.colors.themeColor} name={'send'} />
         </Send>
     )
 
@@ -294,12 +303,11 @@ class ChatScreen extends React.Component<any, any> {
                     renderSend={this.renderSend}
                     renderMessageImage={this.renderMessageImage}
                     isTyping={this.state.isTyping}
-                    bottomOffset={54}
                     renderBubble={this.renderBubble}
                     renderCustomView={this.renderCustomView}
                     infiniteScroll
                     renderAvatar={this.renderAvatarImage}
-                    renderAccessory={Platform.OS === 'web' ? null : this.renderAccessory}
+                // renderAccessory={Platform.OS === 'web' ? null : this.renderAccessory}
                 />
             </View>
         );

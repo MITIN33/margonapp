@@ -66,7 +66,7 @@ class HomeScreen extends Component<any, any> {
                                 this.props.navigation.navigate('Chat', l)
                             }}>
                                 <Avatar source={{ uri: l.photoUrl }} rounded >
-                                    {i % 4 == 0 ? <Avatar.Accessory source={require('../assets/online-image.png')} /> : null}
+                                    {l.isUserOnline ? <Avatar.Accessory source={require('../assets/online-image.png')} /> : null}
                                 </Avatar>
                                 <ListItem.Content>
                                     <ListItem.Title>{l.name}</ListItem.Title>
