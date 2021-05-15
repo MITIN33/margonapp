@@ -40,40 +40,40 @@ class AppNavigator extends Component<any, any> {
         const firstName = userstore.user?.firstName;
         return (
 
-            <KeyboardAvoidingView
-                style={{ flex: 1, flexDirection: 'column', justifyContent: 'center' }}
-                behavior={Platform.OS === "ios" ? "padding" : "height"}>
-                <NavigationContainer>
-                    <Stack.Navigator screenOptions={{ headerShown: false }}>
-                        {authStore.isUserSigned ?
-                            (
-                                <>
-                                    <Stack.Screen name="Home" component={TabNavigation} options={{
-                                        title: firstName,
-                                        headerShown: true,
-                                        headerLeft: () => (<Icon name='person-circle-outline' size={30} type='ionicon' style={{ marginLeft: 15 }} />),
-                                        headerRight: () => (<Icon name='ellipsis-vertical-outline' type='ionicon' />),
-                                        headerStyle: headerStyle
-                                    }} />
-                                    <Stack.Screen name="Chat" component={ChatScreen} options={{
-                                        title: 'Chat',
-                                        headerShown: true,
-                                        headerRight: () => (<Icon name='ellipsis-vertical-outline' type='ionicon' />),
-                                        headerStyle: headerStyle
-                                    }} />
-                                </>
-                            ) :
-                            (
-                                <>
-                                    <Stack.Screen name="GetStarted" component={GetStartedScreen} />
-                                    <Stack.Screen name="Login" component={LoginScreen} />
-                                    <Stack.Screen name="Verification" component={VerificationScreen} />
-                                    <Stack.Screen name="SignUp" component={SignupScreen} />
-                                </>
-                            )}
-                    </Stack.Navigator>
-                </NavigationContainer>
-            </KeyboardAvoidingView >
+            // <KeyboardAvoidingView
+            //     style={{ flex: 1 }}
+            //     behavior={Platform.OS === "ios" ? "padding" : "height"}>
+            <NavigationContainer>
+                <Stack.Navigator screenOptions={{ headerShown: false }}>
+                    {authStore.isUserSigned ?
+                        (
+                            <>
+                                <Stack.Screen name="Home" component={TabNavigation} options={{
+                                    title: firstName,
+                                    headerShown: true,
+                                    headerLeft: () => (<Icon name='person-circle-outline' size={30} type='ionicon' style={{ marginLeft: 15 }} />),
+                                    headerRight: () => (<Icon name='ellipsis-vertical-outline' type='ionicon' />),
+                                    headerStyle: headerStyle
+                                }} />
+                                <Stack.Screen name="Chat" component={ChatScreen} options={{
+                                    title: 'Chat',
+                                    headerShown: true,
+                                    headerRight: () => (<Icon name='ellipsis-vertical-outline' type='ionicon' />),
+                                    headerStyle: headerStyle
+                                }} />
+                            </>
+                        ) :
+                        (
+                            <>
+                                <Stack.Screen name="GetStarted" component={GetStartedScreen} />
+                                <Stack.Screen name="Login" component={LoginScreen} />
+                                <Stack.Screen name="Verification" component={VerificationScreen} />
+                                <Stack.Screen name="SignUp" component={SignupScreen} />
+                            </>
+                        )}
+                </Stack.Navigator>
+            </NavigationContainer>
+            // </KeyboardAvoidingView >
         );
     };
 }
