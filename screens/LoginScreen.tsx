@@ -21,7 +21,7 @@ class LoginScreen extends Component<any, any> {
 
     render() {
         return (
-            <CompatibleView style={{ flex: 1, justifyContent: 'center', marginTop: 200, alignItems: 'center', padding: 20 }} >
+            <CompatibleView style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }} >
                 {/* <Input placeholder={"User Name"} onChangeText={this.onUserNameChange} />
                 <View style={{ flexDirection: "row", justifyContent: "space-between", width: "100%" }}>
                     <Text onPress={() => this.props.navigation.navigate("SignUp")}>Register</Text>
