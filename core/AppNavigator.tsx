@@ -58,7 +58,7 @@ class AppNavigator extends Component<any, any> {
                                         headerRight: () => (
                                             <Button
                                                 type='clear'
-                                                icon={<Icon name='options-outline' size={20} type='ionicon' style={{ marginLeft: 15 }} />}
+                                                icon={<Icon name='options-outline' size={25} type='ionicon' style={{ marginRight: 10 }} />}
                                                 onPress={() => navigation.navigate('Settings')} />
                                         ),
                                         headerStyle: headerStyle
