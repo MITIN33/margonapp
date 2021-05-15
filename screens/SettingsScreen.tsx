@@ -17,6 +17,17 @@ class SettingsScreen extends Component<any, any> {
     OnHandlePress2 = (event: GestureResponderEvent) => {
         console.log("Action 2");
     };
+    OnHandleEdit = () => {
+        console.log("Edit");
+    };
+    OnHandleImageClick = () => {
+        try {
+            this.props.navigation.navigate('ProfileImage');
+        }
+        catch (ex) {
+            // logging
+        }
+    }
     updateAvailibilityFlag = () => {
         try {
             const { availibilityFlag } = this.state;
@@ -29,13 +40,12 @@ class SettingsScreen extends Component<any, any> {
     OnHandleSignOut = () => {
         Alert.alert("Sign Out", 'Are you sure you want to sign out?', [
             {
-              text: "Cancel",
-              onPress: () => console.log("Cancel Pressed")
+                text: "Cancel",
+                onPress: () => console.log("Cancel Pressed")
             },
             { text: "OK", onPress: userstore.Logout }
-          ]);
+        ]);
     };
-
 
     constructor(props) {
         super(props);
@@ -79,29 +89,31 @@ class SettingsScreen extends Component<any, any> {
         const { availibilityFlag } = this.state;
         const currentUser = userstore.user;
         return (
-                <View>
-                    <View style={{ flex: 1, justifyContent: 'center', marginTop: 20, marginBottom:20, alignItems: 'center', padding: 60}}>
-                <Avatar size={85} source={{ uri: currentUser.profilePicUrl }} rounded />
-                <Text style={{marginTop:10, fontSize:24}}>{currentUser.firstName}</Text>
+            <View>
+                <View style={{ flex: 1, justifyContent: 'center', marginTop: 20, marginBottom: 20, alignItems: 'center', padding: 60 }}>
+                    <Avatar onPress={this.OnHandleImageClick} size={85} source={{ uri: currentUser.profilePicUrl }} rounded >
+                        <Avatar.Accessory onPress={this.OnHandleEdit} size={20} source={require('../assets/edit-icon.png')} />
+                    </Avatar>
+                    <Text style={{ marginTop: 10, fontSize: 24 }}>{currentUser.firstName}</Text>
                 </View>
-                    {this.state.list.map((item, i) => (
-                        <ListItem key={i} bottomDivider onPress={item.action}>
-                            <ListItem.Content>
-                                <ListItem.Title>{item.title}</ListItem.Title>
-                                <ListItem.Subtitle>{item.Subtitle}</ListItem.Subtitle>
-                            </ListItem.Content>
-                            {(item.title === 'Availibility') &&
-                                <Switch value={availibilityFlag} color="green" onValueChange={this.updateAvailibilityFlag}></Switch>}
-                        </ListItem>
-                    ))}
-                    {this.state.list2.map((item, i) => (
-                        <ListItem style={{marginTop: 20}} key={i} bottomDivider onPress={item.action}>
-                            <ListItem.Content style={{ alignItems: 'center'}}>
-                                <ListItem.Title style={{color:'red'}}>{item.title}</ListItem.Title>
-                            </ListItem.Content>
-                        </ListItem>
-                    ))}
-                </View>
+                {this.state.list.map((item, i) => (
+                    <ListItem key={i} bottomDivider onPress={item.action}>
+                        <ListItem.Content>
+                            <ListItem.Title>{item.title}</ListItem.Title>
+                            <ListItem.Subtitle>{item.Subtitle}</ListItem.Subtitle>
+                        </ListItem.Content>
+                        {(item.title === 'Availibility') &&
+                            <Switch value={availibilityFlag} color="green" onValueChange={this.updateAvailibilityFlag}></Switch>}
+                    </ListItem>
+                ))}
+                {this.state.list2.map((item, i) => (
+                    <ListItem style={{ marginTop: 20 }} key={i} bottomDivider onPress={item.action}>
+                        <ListItem.Content style={{ alignItems: 'center' }}>
+                            <ListItem.Title style={{ color: 'red' }}>{item.title}</ListItem.Title>
+                        </ListItem.Content>
+                    </ListItem>
+                ))}
+            </View>
         );
     }
 }

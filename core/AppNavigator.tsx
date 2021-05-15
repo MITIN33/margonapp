@@ -6,6 +6,7 @@ import LoginScreen from "../screens/LoginScreen";
 import { userstore } from "../stores/UserStore";
 import TabNavigation from "../screens/TabNavigation";
 import SettingsScreen from "../screens/SettingsScreen";
+import ProfileImageScreen from "../screens/ProfileImageScreen";
 import { KeyboardAvoidingView, Platform, StatusBar, View } from "react-native";
 import SignupScreen from "../screens/SignUpScreen";
 import ChatScreen from "../screens/ChatScreen";
@@ -76,6 +77,8 @@ class AppNavigator extends Component<any, any> {
                                         headerShown: true,
                                         headerStyle: headerStyle
                                     }}/>
+                                     <Stack.Screen name="ProfileImage" component={ProfileImageScreen} 
+                                    />
                                 </>
                             ) :
                             (
