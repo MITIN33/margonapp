@@ -1,14 +1,20 @@
 import { observer } from 'mobx-react';
 import React, { Component } from 'react';
 import { Text, View, Image, Alert, Keyboard, ImageBackground } from 'react-native';
+import { IMessage } from "react-native-gifted-chat";
 import { Input, Button } from 'react-native-elements';
 import { color } from 'react-native-elements/dist/helpers';
 import { margonServer } from '../api/axios-instance';
-import { Divider } from '../components/base-components';
+import { Container, Divider } from '../components/base-components';
 import { userstore } from '../stores/UserStore';
-import { Avatar, ListItem, Icon } from 'react-native-elements';
+import { Avatar, ListItem, Icon, Overlay } from 'react-native-elements';
 import { GestureResponderEvent } from 'react-native';
 import { Switch } from 'react-native-elements';
+import {
+    pickImageAsync,
+    takePictureAsync,
+} from '../components/media-utils';
+
 @observer
 class SettingsScreen extends Component<any, any> {
 
@@ -46,7 +52,8 @@ class SettingsScreen extends Component<any, any> {
             isLoading: false,
             list: list,
             list2: list2,
-            availibilityFlag: true
+            availibilityFlag: true,
+            visible: false
         }
     }
 
@@ -58,6 +65,7 @@ class SettingsScreen extends Component<any, any> {
     };
     OnHandleEdit = () => {
         console.log("Edit");
+        this.toggleOverlay();
     };
     OnHandleImageClick = () => {
         try {
@@ -87,8 +95,17 @@ class SettingsScreen extends Component<any, any> {
         ]);
     };
 
+    toggleOverlay = () => {
+        const { visible } = this.state;
+        this.setState({ visible: !visible });
+    };
+
+    onImageUpload = (messages: IMessage[] = []) => {
+       console.log(messages);
+    }
+
     render() {
-        const { availibilityFlag } = this.state;
+        const { availibilityFlag, visible } = this.state;
         const currentUser = userstore.user;
         const userFullName = currentUser.firstName + ' ' + (currentUser.lastName ? currentUser.lastName : '');
         return (
@@ -99,6 +116,28 @@ class SettingsScreen extends Component<any, any> {
                     </Avatar>
                     <Text style={{ marginTop: 10, fontSize: 24 }}>{userFullName}</Text>
                 </View>
+                <Overlay isVisible={visible} onBackdropPress={this.toggleOverlay}>
+                    <Text style={{ marginLeft: 5, fontWeight: 'bold' }}>Upload Profile Picture</Text>
+                    <View style={{
+                        width: '30%',
+                        backgroundColor: 'white',
+                        flexDirection: 'row',
+                        alignItems: 'center'
+                    }}>
+                        <Button
+                            type='clear'
+                            icon={<Icon name='image-outline' size={25} type='ionicon' style={{ marginRight: 10 }} />}
+                            onPress={() => pickImageAsync(this.onImageUpload)} 
+                            title='Gallery'
+                        />
+                        <Button
+                            type='clear'
+                            icon={<Icon name='camera-outline' size={25} type='ionicon' style={{ marginRight: 10 }} />}
+                            title='Camera'
+                            onPress={() => takePictureAsync(this.onImageUpload)} 
+                        />
+                    </View>
+                </Overlay>
                 {this.state.list.map((item, i) => (
                     <ListItem key={i} bottomDivider onPress={item.action}>
                         <ListItem.Content>
