@@ -16,10 +16,10 @@ class ProfileImageScreen extends Component<any, any> {
     }
 
     render() {
-        const currentUser = userstore.user;
+        const currentUserPic = this.props.route.params;
         return (
                 <View style={{flex:1, width: '100%'}}>
-                  <Avatar containerStyle={{flex:1, width:'100%'}} avatarStyle={{ resizeMode: 'contain'}} source={{ uri: currentUser.profilePicUrl }} />
+                  <Avatar containerStyle={{flex:1, width:'100%'}} avatarStyle={{ resizeMode: 'contain'}} source={{ uri: currentUserPic }} />
                 </View>
         );
     }

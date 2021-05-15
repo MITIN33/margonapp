@@ -77,7 +77,11 @@ class AppNavigator extends Component<any, any> {
                                         headerShown: true,
                                         headerStyle: headerStyle
                                     }}/>
-                                     <Stack.Screen name="ProfileImage" component={ProfileImageScreen} 
+                                     <Stack.Screen name="ProfileImage" component={ProfileImageScreen} options={{
+                                        title: 'Profile Picture',
+                                        headerShown: true,
+                                        headerStyle: headerStyle
+                                    }}
                                     />
                                 </>
                             ) :
