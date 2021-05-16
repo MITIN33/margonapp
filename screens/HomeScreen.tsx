@@ -23,7 +23,7 @@ class HomeScreen extends Component<any, any> {
         super(props);
         if (Platform.OS !== 'ios')
             StatusBar.setBackgroundColor('#71afe5');
-        if(Platform.OS !== 'web')
+        if (Platform.OS !== 'web')
             LogBox.ignoreLogs(['Setting a timer']);
         this.state = {
             isLoading: true
@@ -63,7 +63,9 @@ class HomeScreen extends Component<any, any> {
                             <ListItem key={i} bottomDivider onPress={() => {
                                 this.props.navigation.navigate('Chat', l)
                             }}>
-                                <Avatar source={{ uri: l.photoUrl }} rounded >
+                                <Avatar source={{ uri: l.photoUrl }} rounded onPress={() => {
+                                    this.props.navigation.navigate('ProfileImage', l.photoUrl)
+                                }}>
                                     {l.isUserOnline ? <Avatar.Accessory source={require('../assets/online-image.png')} /> : null}
                                 </Avatar>
                                 <ListItem.Content>
