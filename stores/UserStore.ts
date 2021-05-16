@@ -10,6 +10,11 @@ class UserStore {
     @observable
     public isUserloading: boolean = true;
 
+    @observable
+    public isUserOnlineMap: Map<string, boolean> = new Map<string, boolean>();
+
+    @observable
+    public isUserReadingChatMap: Map<string, boolean> = new Map<string, boolean>();
 
     //non-observable
     public user: UserModel = null;
@@ -23,6 +28,12 @@ class UserStore {
     @action
     public setIsUserLoading(value) {
         this.isUserloading = value;
+    }
+
+
+    @action
+    public updateReadingChatMap(userId, value) {
+        this.isUserReadingChatMap.set(userId, value);
     }
 
     public async fetchUser() {

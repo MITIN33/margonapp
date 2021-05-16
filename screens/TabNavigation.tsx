@@ -13,7 +13,8 @@ class TabNavigation extends Component {
         super(props)
     }
 
-    componentDidMount() {
+
+    componentDidMount(){
         chatHubClient.stetupConnection()
     }
 

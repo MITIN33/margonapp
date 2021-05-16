@@ -10,7 +10,7 @@ class ChatStore {
     @observable
     public isDialogsLoading = true;
 
-    public messageForDialogs: Map<string, IMargonChatMessage[]>
+    public messageForDialogs: Map<string, IMargonChatMessage[]> = new Map()
     private chatContinuationToken: string
 
     /**
@@ -52,6 +52,25 @@ class ChatStore {
         })
     };
 
+    @action
+    public setUnReadCountToZero(dialogId) {
+        console.log('updating count');
+        this.dialogs.map(x => {
+            if (x.dialogId === dialogId) {
+                x.unreadMessageCount = 0
+            }
+        })
+    };
+
+    @action
+    public markUserOnlineForDialog(userId: string, isUserOnline: boolean) {
+        this.dialogs.map(x => {
+            if (x.otherUserId == userId) {
+                x.isUserOnline = isUserOnline
+            }
+        })
+    };
+
     public async loadChatMessagesForDialogId(dialogId: string) {
 
         try {
@@ -59,6 +78,7 @@ class ChatStore {
             let messages = [];
             if (response.data) {
                 messages = response.data['items'];
+                this.messageForDialogs.set(dialogId, messages)
                 this.chatContinuationToken = response.data['continuationToken'];
             }
             return messages;

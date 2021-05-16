@@ -9,6 +9,7 @@ import { ScrollView } from 'react-native-gesture-handler';
 import { chatHubClient } from '../chats/chat-client';
 import { IMargonChatMessage, ScreenName } from '../models/chat-models';
 import { chatStore } from '../stores/ChatStore';
+import { userstore } from '../stores/UserStore';
 
 const access = () => <Icon name='ellipsis-vertical-outline' type='ionicon' />;
 
@@ -47,15 +48,12 @@ class HomeScreen extends Component<any, any> {
     }
 
     render() {
-        if (chatStore.isDialogsLoading) {
-            return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><Text>Loading...</Text></View>
-        }
-
+        
         return (
             <ScrollView
                 refreshControl={
                     <RefreshControl
-                        refreshing={false}
+                        refreshing={chatStore.isDialogsLoading}
                         onRefresh={this.onRefresh}
                     />}
             >

@@ -3,6 +3,8 @@ import * as signalR from '@microsoft/signalr';
 import { ToastAndroid } from 'react-native';
 import { IMargonChatMessage } from '../models/chat-models';
 import { authStore } from '../stores/AuthStore';
+import { chatStore } from '../stores/ChatStore';
+import { userstore } from '../stores/UserStore';
 
 const chatHubUrl = "http://margonserver.azurewebsites.net/chatHub";
 
@@ -31,17 +33,23 @@ class ChatHubclient {
 
     public onMessageReceiveFunc: (message: IMargonChatMessage) => void;
     public onMessageReceiveHomeFunc: (message: IMargonChatMessage) => void;
-    public onChatRead: (dialogId) => void;
+    public onChatRead: (dialogId, isChatRead) => void;
+    public userIsTyping: (dialogId) => void;
+    public isUserOnline: (userId, isOnline) => void;
+
 
 
     public sendMessage(toUserId, senderUserId, message) {
-        // console.log("Message sending:" + JSON.stringify(message));
         return connection.invoke("SendMessage", toUserId, senderUserId, message)
     }
 
     public sendTypingMessage(toUserId) {
-        // console.log("Message sending:" + JSON.stringify(message));
         return connection.invoke("IsTyping", toUserId)
+    }
+
+    public isUserReadingChat(thisUserId, isReading) {
+        // console.log("Message sending:" + JSON.stringify(message));
+        return connection.invoke("IsReadingChat", thisUserId, isReading)
     }
 
     public async stetupConnection() {
@@ -71,13 +79,24 @@ class ChatHubclient {
         });
 
 
-        connection.on('ChatRead', (dialogId) => {
+        connection.on('IsOnline', (userId, isOnline) => {
+            console.log(`User ${userId}, OnlineStatus: ${isOnline}`);
+            // userstore.isUserReadingChatMap.set(userId, isOnline);
+            chatStore.markUserOnlineForDialog(userId, isOnline);
+        })
 
+        connection.on('IsReadingChat', (userId, isReadingChat) => {
+            // console.log(`User ${userId}, IsReading: ${isReadingChat}`);
+            //userstore.isUserReadingChatMap.set(userId, isReadingChat);
+            if (this.onChatRead)
+                this.onChatRead(userId, isReadingChat)
         })
 
 
         connection.on('IsTyping', (userId) => {
-
+            if (this.userIsTyping) {
+                this.userIsTyping(userId)
+            }
         })
     }
 }

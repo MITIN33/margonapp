@@ -20,6 +20,8 @@ class ChatScreen extends React.Component<any, any> {
     otherUser;
     user;
     selectedDialog: IDialogs;
+    sentTypingMessageSignal: boolean;
+    isOtherUserReadingChat: boolean = false;
 
     constructor(props) {
         super(props);
@@ -37,6 +39,8 @@ class ChatScreen extends React.Component<any, any> {
             name: userstore.user.firstName,
             avatar: userstore.user.profilePicUrl
         }
+
+        this.sentTypingMessageSignal = true;
         this.state = {
             inverted: false,
             step: 0,
@@ -54,12 +58,19 @@ class ChatScreen extends React.Component<any, any> {
     componentWillUnmount() {
         this._isMounted = false
         chatHubClient.onMessageReceiveFunc = null;
+        chatHubClient.userIsTyping = null;
+        chatHubClient.isUserReadingChat(this.otherUser._id, false);
     }
 
     componentDidMount() {
         this._isMounted = true
         chatHubClient.onMessageReceiveFunc = this.onReceive;
+        chatHubClient.userIsTyping = this.setIsTypingFunc;
+        chatHubClient.onChatRead = this.markallMessageAsRead;
+        chatHubClient.isUserReadingChat(this.otherUser._id, true);
         this.props.navigation.setOptions({ headerTitle: this.selectedDialog.name });
+
+        chatStore.setUnReadCountToZero(this.selectedDialog.dialogId);
 
         chatStore.loadChatMessagesForDialogId(this.selectedDialog.dialogId)
             .then((response) => {
@@ -96,6 +107,20 @@ class ChatScreen extends React.Component<any, any> {
         return messages;
     }
 
+
+    onInputTextChange = (text: string) => {
+
+        if (this.sentTypingMessageSignal && text.length > 0) {
+            this.sentTypingMessageSignal = false
+            chatHubClient.sendTypingMessage(this.otherUser._id)
+                .finally(() => {
+                    setTimeout(() => {
+                        this.sentTypingMessageSignal = true
+                    }, 10000);
+                });
+        }
+    }
+
     onLoadEarlier = () => {
         this.setState(() => {
             return {
@@ -122,6 +147,22 @@ class ChatScreen extends React.Component<any, any> {
             .catch((e) => console.log(e.message));
     }
 
+
+    markallMessageAsRead = (userId, isChatRead) => {
+        if (isChatRead && userId === this.otherUser._id) {
+            const list = this.state.messages
+            list.map((x: IMessage, i) => {
+                x.pending = false
+                x.sent = true
+                x.received = true
+            })
+            this.setState({ messages: list });
+            this.isOtherUserReadingChat = true
+        }
+        else{
+            this.isOtherUserReadingChat = false;
+        }
+    }
 
     onSend = (messages: IMessage[] = []) => {
 
@@ -152,7 +193,7 @@ class ChatScreen extends React.Component<any, any> {
                     if (x._id === messageId) {
                         x.pending = false
                         x.sent = true
-                        x.received = true
+                        x.received = this.isOtherUserReadingChat
                     }
                 })
                 this.setState({ messages: list });
@@ -183,7 +224,7 @@ class ChatScreen extends React.Component<any, any> {
                         {
                             _id: message.id,
                             text: message.message,
-                            createdAt: new Date(),
+                            createdAt: message.dateSent,
                             user: this.otherUser,
                             sent: true,
                             received: true
@@ -191,12 +232,9 @@ class ChatScreen extends React.Component<any, any> {
                     ],
                     Platform.OS !== 'web',
                 ),
+                isTyping: false
             }
         })
-    }
-
-    onChatRead = (dialogId: string) => {
-
     }
 
     renderMessageImage = (props) => {
@@ -243,14 +281,20 @@ class ChatScreen extends React.Component<any, any> {
         this.onSend(messagesToUpload)
     }
 
-    setIsTyping = () => {
-        this.setState({
-            isTyping: !this.state.isTyping,
-        })
+    setIsTypingFunc = (userId) => {
+        console.log(`$User :${userId} is typing`);
+        if (this.otherUser._id === userId) {
+            this.setState({
+                isTyping: !this.state.isTyping,
+            })
+            setTimeout(() => {
+                this.setState({ isTyping: false })
+            }, 5000);
+        }
     }
 
     renderAccessory = () => (
-        <AccessoryBar onSend={this.onSendFromUser} isTyping={this.setIsTyping} />
+        <AccessoryBar onSend={this.onSendFromUser} isTyping={this.setIsTypingFunc} />
     )
 
     renderSend = (props: Send['props']) => (
@@ -306,8 +350,9 @@ class ChatScreen extends React.Component<any, any> {
                     renderBubble={this.renderBubble}
                     renderCustomView={this.renderCustomView}
                     infiniteScroll
+                    onInputTextChanged={this.onInputTextChange}
                     renderAvatar={this.renderAvatarImage}
-                // renderAccessory={Platform.OS === 'web' ? null : this.renderAccessory}
+                    renderAccessory={Platform.OS === 'web' ? null : this.renderAccessory}
                 />
             </View>
         );
