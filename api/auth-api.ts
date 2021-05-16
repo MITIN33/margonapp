@@ -1,5 +1,4 @@
-import firebase from 'firebase';
-import firebaseApp from './firebase-config';
+import { firebaseApp } from './firebase-config';
 
 export const logoutUser = async () => {
   return await firebaseApp.auth().signOut();
