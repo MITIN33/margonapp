@@ -39,14 +39,14 @@ class AuthStore {
             if (authResponse.expiresAt < Math.round(Date.now() / 1000)) {
                 try {
                     console.log("Token expired")
-                    var httpResponse = await margonServer.post('/auth/token', { refreshToken: authResponse.refreshToken, grantType: 2 })
+                    var httpResponse = await margonServer.post('/auth/token', { refreshToken: authResponse.refreshToken, grantType: 1 })
                     if (httpResponse.data) {
                         await asyncStorage.saveData(clientConstants.AUTH_STORAGE_KEY, httpResponse.data)
                         authResponse = httpResponse.data;
                         console.log('Token re-acquired successfully');
                     }
                 } catch (error) {
-                    console.log("Unable to acquire token");
+                    console.log("Unable to acquire token. Error: " + JSON.stringify(error.response.data));
                     if (error.response.status == 401) {
                         this.setUserSignedIn(false);
                     }

@@ -1,9 +1,5 @@
-import axios from "react-native-axios";
 import React, { Component } from 'react';
-import { Text } from 'react-native-paper';
 import { Button, Container, TextInput } from '../components/base-components';
-import { margonServer } from "../api/axios-instance";
-import { Keyboard } from "react-native";
 import { margonAPI } from "../api/margon-server-api";
 
 class SignupScreen extends Component<any, any>{
