@@ -1,11 +1,7 @@
 import { observer } from 'mobx-react';
 import React, { Component } from 'react';
-import { Text, View, Image, Alert, Keyboard, ImageBackground } from 'react-native';
-import { Input, Button } from 'react-native-elements';
-import { color } from 'react-native-elements/dist/helpers';
-import { margonServer } from '../api/axios-instance';
-import { Divider } from '../components/base-components';
-import { userstore } from '../stores/UserStore';
+import { View, Image } from 'react-native';
+import { Button } from 'react-native-elements';
 
 @observer
 class GetStartedScreen extends Component<any, any> {

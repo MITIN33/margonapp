@@ -1,7 +1,8 @@
-import { useTheme } from '@react-navigation/native';
 import * as React from 'react';
+import { TextInputProps } from 'react-native';
 import { KeyboardAvoidingView, Platform, Text, View } from 'react-native';
 import { Button as RNEButton, Input as RNEInput } from 'react-native-elements';
+import AppTheme from '../theme/AppTheme';
 
 
 function Container(props) {
@@ -15,8 +16,13 @@ function Button(props) {
     </RNEButton>;
 }
 
-function TextInput(props) {
-    return <RNEInput inputStyle={{ marginTop: 0 }} returnKeyLabel='Done' returnKeyType='done' {...props} />
+function TextInput(props: TextInputProps) {
+    return <RNEInput
+        inputContainerStyle={{ borderWidth: 1, borderRadius: 5, borderColor: AppTheme.colors.themeColor, paddingLeft: 15 }}
+        inputStyle={{ marginTop: 0 }}
+        returnKeyLabel='Done'
+        returnKeyType='done'
+        {...props} />
 }
 
 function CompatibleView(props) {

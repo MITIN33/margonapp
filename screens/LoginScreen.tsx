@@ -1,21 +1,23 @@
 import { observer } from 'mobx-react';
 import React, { Component } from 'react';
-import { Text, View, Image, Alert, Keyboard, ImageBackground, KeyboardAvoidingView, Platform } from 'react-native';
+import { Text, View, Alert, Keyboard } from 'react-native';
 import { Input, Button } from 'react-native-elements';
-import { color } from 'react-native-elements/dist/helpers';
-import { margonServer } from '../api/axios-instance';
+import { firebaseAuth } from '../api/firebase-config';
 import { margonAPI } from '../api/margon-server-api';
-import { Divider, CompatibleView } from '../components/base-components';
+import { Divider, CompatibleView, TextInput } from '../components/base-components';
 import { userstore } from '../stores/UserStore';
 
 @observer
 class LoginScreen extends Component<any, any> {
+    code: any;
+    confirmation: any;
     constructor(props) {
         super(props);
         this.state = {
             userName: '',
             password: '',
-            isLoading: false
+            isLoading: false,
+            phoneNumber: '+91'
         }
     }
 
@@ -38,10 +40,27 @@ class LoginScreen extends Component<any, any> {
                     <Text>Forgot Password</Text>
                 </View>
                 <Divider text="OR" />
-                <Button title="Login" loading={this.state.isLoading} disabled={this.state.isLoading} onPress={(ev) => this.onLoginClick(ev)} />
+
+                {/* <TextInput
+                    maxLength={14}
+                    keyboardType='number-pad'
+                    value={this.state.phoneNumber}
+                    onChangeText={this.onChangeText}
+                /> */}
+
+                <Button title="Send Code" loading={this.state.isLoading} disabled={this.state.isLoading} onPress={(ev) => this.onLoginClick(ev)} />
             </CompatibleView>
 
         );
+    }
+
+    
+    private onChangeText = (text) => {
+        if (text.length <= 3) {
+            return
+        }
+        else
+            this.setState({ phoneNumber: text })
     }
 
     private onLoginClick = (ev) => {
@@ -70,6 +89,25 @@ class LoginScreen extends Component<any, any> {
                 this.setLoading(false);
             })
     }
+
+    confirmCode = () => {
+        this.confirmation.confirm(this.code).then((result) => {
+            // User signed in successfully.
+            const user = result.user;
+            console.log(JSON.stringify(user))
+            // ...
+        }).catch((error) => {
+            console.error(error);
+        });
+    }
+
+    sendCode = async (phoneNumber) => {
+        console.log('sending code to number')
+        const result = await firebaseAuth.signInWithPhoneNumber(phoneNumber);
+        this.confirmation = result;
+        console.log('code sent')
+    }
+
 
     private onUserNameChange = (userName) => {
         this.setState({ userName });

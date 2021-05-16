@@ -1,13 +1,13 @@
-import  { firebase } from '@react-native-firebase/auth';
+import { firebaseApp } from './firebase-config';
 
 export const logoutUser = async () => {
-  return await firebase.auth().signOut();
+  return await firebaseApp.auth().signOut();
 };
 
 export const signInUser = async ({ name, email, password }) => {
   try {
-    await firebase.auth().createUserWithEmailAndPassword(email, password);
-    firebase.auth().currentUser?.updateProfile({
+    await firebaseApp.auth().createUserWithEmailAndPassword(email, password);
+    firebaseApp.auth().currentUser?.updateProfile({
       displayName: name
     });
 
@@ -41,22 +41,22 @@ export const signInUser = async ({ name, email, password }) => {
 export const loginUser = async ({ email, password }) => {
   let errorMessage = '';
   try {
-    const user = await firebase.auth().signInWithEmailAndPassword(email, password);
+    const user = await firebaseApp.auth().signInWithEmailAndPassword(email, password);
     return user.user;
   } catch (error) {
     switch (error.code) {
-      case "auth/invalid-email":        
+      case "auth/invalid-email":
         errorMessage = "Invalid email address format.";
         break;
       case "auth/user-not-found":
       case "auth/wrong-password":
-          errorMessage: "Invalid email address or password.";
-          break;
+        errorMessage: "Invalid email address or password.";
+        break;
       case "auth/too-many-requests":
-          errorMessage: "Too many request. Try again in a minute.";
+        errorMessage: "Too many request. Try again in a minute.";
         break;
       default:
-          errorMessage: "Check your internet connection.";
+        errorMessage: "Check your internet connection.";
         break;
     }
     alert(errorMessage);
@@ -65,7 +65,7 @@ export const loginUser = async ({ email, password }) => {
 
 export const sendEmailWithPassword = async email => {
   try {
-    await firebase.auth().sendPasswordResetEmail(email);
+    await firebaseApp.auth().sendPasswordResetEmail(email);
     return {};
   } catch (error) {
     switch (error.code) {
