@@ -43,12 +43,16 @@ class HomeScreen extends Component<any, any> {
         chatStore.loadDialogs();
     }
 
+    timeBasedsort(a, b) {
+        return b.lastMessageDateSent - a.lastMessageDateSent;
+    }
+
     onMessageReceive(message: IMargonChatMessage) {
         chatStore.updateDialogWithMessage(message, ScreenName.HomeScreen);
     }
 
     render() {
-        
+
         return (
             <ScrollView
                 refreshControl={
@@ -59,7 +63,7 @@ class HomeScreen extends Component<any, any> {
             >
                 <View>
                     {
-                        chatStore.dialogs.map((l, i) => (
+                        chatStore.dialogs.slice().sort(this.timeBasedsort).map((l, i) => (
                             <ListItem key={i} bottomDivider onPress={() => {
                                 this.props.navigation.navigate('Chat', l)
                             }}>

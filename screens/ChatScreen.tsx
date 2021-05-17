@@ -170,7 +170,7 @@ class ChatScreen extends React.Component<any, any> {
             message: messages[0].text,
             dialogId: this.selectedDialog.dialogId,
             dateSent: Date.now(),
-            attachments: this.getAttachments(messages[0]),
+            file: messages[0].image,
             userId: this.user._id,
         }
         const messageId = Date.now()

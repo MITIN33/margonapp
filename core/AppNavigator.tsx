@@ -16,6 +16,7 @@ import GetStartedScreen from "../screens/GetStartedScreen";
 import VerificationScreen from "../screens/VerificationScreen";
 import { authStore } from "../stores/AuthStore";
 import { Button } from 'react-native-elements';
+import ProfileImageScreen from "../screens/ProfileImageScreen";
 
 const Stack = createStackNavigator();
 
@@ -49,7 +50,7 @@ class AppNavigator extends Component<any, any> {
                                 <Stack.Screen name="Home" component={TabNavigation} options={({ navigation }) => ({
                                     title: firstName,
                                     headerLeft: () => (
-                                        <Avatar source={{ uri: photoUrl }} containerStyle={{paddingLeft: 15, width: 50}} rounded ></Avatar>
+                                        <Avatar source={{ uri: photoUrl }} containerStyle={{ paddingLeft: 15, width: 50 }} rounded ></Avatar>
                                     ),
                                     headerShown: true,
                                     headerRight: () => (
@@ -73,6 +74,12 @@ class AppNavigator extends Component<any, any> {
                                     headerShown: true,
                                     headerStyle: headerStyle
                                 }} />
+                                <Stack.Screen name="ProfileImage" component={ProfileImageScreen} options={{
+                                    title: 'Profile Picture',
+                                    headerShown: true,
+                                    headerStyle: headerStyle
+                                }}
+                                />
                             </>
                         ) :
                         (

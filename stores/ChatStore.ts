@@ -20,17 +20,6 @@ class ChatStore {
         makeObservable(this)
     }
 
-    public loadDialogs() {
-        this.setIsDialogLoading(true);
-        margonAPI.Dialogs().then((response) => {
-            if (response.data) {
-                this.setDialogList(response.data['items']);
-            }
-        }).finally(() => {
-            this.setIsDialogLoading(false);
-        });
-    }
-
     @action
     public setIsDialogLoading(value) {
         this.isDialogsLoading = value;
@@ -54,7 +43,6 @@ class ChatStore {
 
     @action
     public setUnReadCountToZero(dialogId) {
-        console.log('updating count');
         this.dialogs.map(x => {
             if (x.dialogId === dialogId) {
                 x.unreadMessageCount = 0
@@ -70,6 +58,17 @@ class ChatStore {
             }
         })
     };
+
+    public loadDialogs() {
+        this.setIsDialogLoading(true);
+        margonAPI.Dialogs().then((response) => {
+            if (response.data) {
+                this.setDialogList(response.data['items']);
+            }
+        }).finally(() => {
+            this.setIsDialogLoading(false);
+        });
+    }
 
     public async loadChatMessagesForDialogId(dialogId: string) {
 

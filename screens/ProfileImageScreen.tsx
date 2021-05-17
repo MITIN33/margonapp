@@ -4,7 +4,6 @@ import { View } from 'react-native';
 import { userstore } from '../stores/UserStore';
 import { Avatar } from 'react-native-elements';
 
-@observer
 class ProfileImageScreen extends Component<any, any> {
    
     constructor(props) {

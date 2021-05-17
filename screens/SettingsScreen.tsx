@@ -14,6 +14,7 @@ import {
     pickImageAsync,
     takePictureAsync,
 } from '../components/media-utils';
+import { ScrollView } from 'react-native-gesture-handler';
 
 @observer
 class SettingsScreen extends Component<any, any> {
@@ -101,7 +102,7 @@ class SettingsScreen extends Component<any, any> {
     };
 
     onImageUpload = (messages: IMessage[] = []) => {
-       console.log(messages);
+        console.log(messages);
     }
 
     render() {
@@ -109,8 +110,8 @@ class SettingsScreen extends Component<any, any> {
         const currentUser = userstore.user;
         const userFullName = currentUser.firstName + ' ' + (currentUser.lastName ? currentUser.lastName : '');
         return (
-            <View>
-                <View style={{ flex: 1, justifyContent: 'center', marginTop: 20, marginBottom: 20, alignItems: 'center', padding: 60 }}>
+            <ScrollView>
+                <View style={{ flex: 1, justifyContent: 'center', marginTop: 20, marginBottom: 20, alignItems: 'center'}}>
                     <Avatar onPress={this.OnHandleImageClick} size={85} source={{ uri: currentUser.profilePicUrl }} rounded >
                         <Avatar.Accessory onPress={this.OnHandleEdit} size={20} source={require('../assets/edit-icon.png')} />
                     </Avatar>
@@ -127,14 +128,14 @@ class SettingsScreen extends Component<any, any> {
                         <Button
                             type='clear'
                             icon={<Icon name='image-outline' size={25} type='ionicon' style={{ marginRight: 10 }} />}
-                            onPress={() => pickImageAsync(this.onImageUpload)} 
+                            onPress={() => pickImageAsync(this.onImageUpload)}
                             title='Gallery'
                         />
                         <Button
                             type='clear'
                             icon={<Icon name='camera-outline' size={25} type='ionicon' style={{ marginRight: 10 }} />}
                             title='Camera'
-                            onPress={() => takePictureAsync(this.onImageUpload)} 
+                            onPress={() => takePictureAsync(this.onImageUpload)}
                         />
                     </View>
                 </Overlay>
@@ -155,7 +156,7 @@ class SettingsScreen extends Component<any, any> {
                         </ListItem.Content>
                     </ListItem>
                 ))}
-            </View>
+            </ScrollView>
         );
     }
 }

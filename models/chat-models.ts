@@ -51,7 +51,7 @@ export interface IMargonChatMessage {
     readUserIds?: string,
     deliveredUserIds?: string,
     dateSent: number,
-    attachments: IAttachments,
+    file: string,
 }
 
 export enum MediaType {

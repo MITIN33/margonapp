@@ -4,7 +4,6 @@ import { ToastAndroid } from 'react-native';
 import { IMargonChatMessage } from '../models/chat-models';
 import { authStore } from '../stores/AuthStore';
 import { chatStore } from '../stores/ChatStore';
-import { userstore } from '../stores/UserStore';
 
 const chatHubUrl = "http://margonserver.azurewebsites.net/chatHub";
 
@@ -70,7 +69,7 @@ class ChatHubclient {
 
     private registerEvents(connection: signalR.HubConnection) {
         connection.on("ReceiveMessage", (userId, message) => {
-            console.log("Received message from server: " + message.message);
+            // console.log("Received message from server: " + message.message);
             // console.log(`Chat ${this.onMessageReceiveFunc} and Home ${this.onMessageReceiveHomeFunc}`);
             if (this.onMessageReceiveFunc)
                 this.onMessageReceiveFunc(message);
