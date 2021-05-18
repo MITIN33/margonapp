@@ -1,6 +1,6 @@
-import { View, Platform, ActivityIndicator, Text, KeyboardAvoidingView } from "react-native";
+import { View, Platform, ActivityIndicator, Text } from "react-native";
 import React from "react";
-import { Bubble, GiftedChat, IChatMessage, IMessage, Send } from "react-native-gifted-chat";
+import { Bubble, GiftedChat, IMessage, Send } from "react-native-gifted-chat";
 import { Avatar, Image } from 'react-native-elements';
 import { StatusBar } from "react-native";
 import { MaterialIcons } from '@expo/vector-icons'
@@ -8,16 +8,28 @@ import AccessoryBar from "../components/accessory-bar";
 import CustomView from "../components/custom-view";
 import AppTheme from "../theme/AppTheme";
 import { userstore } from "../stores/UserStore";
-import { chatHubClient } from "../chats/chat-client";
-import { IAttachments, IDialogs, IMargonChatMessage, MediaType, ScreenName } from "../models/chat-models";
+import { IDialogs, IMargonChatMessage, ScreenName } from "../models/chat-models";
 import { chatStore } from "../stores/ChatStore";
+import { observer } from "mobx-react";
+import { dialogsStore } from "../stores/DialogsStore";
+import { chatHubStore } from "../chats/chat-client";
 
-class ChatScreen extends React.Component<any, any> {
+export interface IChatScreenSettingStore {
+    inverted: boolean,
+    loadEarlier: boolean,
+    typingText: null,
+    isLoadingEarlier: boolean,
+    appIsReady: boolean,
+    isTyping: boolean,
+    isLoading: boolean
+}
+
+@observer
+class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
 
 
     private _isMounted = false
 
-    otherUser;
     user;
     selectedDialog: IDialogs;
     sentTypingMessageSignal: boolean;
@@ -26,14 +38,10 @@ class ChatScreen extends React.Component<any, any> {
     constructor(props) {
         super(props);
         if (Platform.OS !== 'ios')
-            StatusBar.setBackgroundColor('#71afe5');
+            StatusBar.setBackgroundColor(AppTheme.colors.themeColor);
 
         this.selectedDialog = this.props.route.params;
-        this.otherUser = {
-            _id: this.selectedDialog.otherUserId,
-            name: this.selectedDialog.name,
-            avatar: this.selectedDialog.photoUrl
-        }
+
         this.user = {
             _id: userstore.user.userId,
             name: userstore.user.firstName,
@@ -43,8 +51,6 @@ class ChatScreen extends React.Component<any, any> {
         this.sentTypingMessageSignal = true;
         this.state = {
             inverted: false,
-            step: 0,
-            messages: [],
             loadEarlier: true,
             typingText: null,
             isLoadingEarlier: false,
@@ -57,29 +63,20 @@ class ChatScreen extends React.Component<any, any> {
 
     componentWillUnmount() {
         this._isMounted = false
-        chatHubClient.onMessageReceiveFunc = null;
-        chatHubClient.userIsTyping = null;
-        chatHubClient.isUserReadingChat(this.otherUser._id, false);
+        chatHubStore.isUserReadingChat(this.selectedDialog.otherUserId, false);
     }
 
     componentDidMount() {
         this._isMounted = true
-        chatHubClient.onMessageReceiveFunc = this.onReceive;
-        chatHubClient.userIsTyping = this.setIsTypingFunc;
-        chatHubClient.onChatRead = this.markallMessageAsRead;
-        chatHubClient.isUserReadingChat(this.otherUser._id, true);
+        chatHubStore.isUserReadingChat(this.selectedDialog.otherUserId, true);
+        dialogsStore.setUnMessageCountZero(this.selectedDialog.dialogId)
         this.props.navigation.setOptions({ headerTitle: this.selectedDialog.name });
 
-        chatStore.setUnReadCountToZero(this.selectedDialog.dialogId);
-
-        chatStore.loadChatMessagesForDialogId(this.selectedDialog.dialogId)
-            .then((response) => {
+        chatStore.loadChatMessagesForDialogId(this.selectedDialog)
+            .then(() => {
                 if (this._isMounted) {
-                    let messages = [];
-                    messages = this.loadMessages(response);
                     // init with only system messages
                     this.setState({
-                        messages: messages,
                         appIsReady: true,
                         isTyping: false,
                         isLoading: false
@@ -90,29 +87,11 @@ class ChatScreen extends React.Component<any, any> {
 
     }
 
-    loadMessages(msg: any) {
-        let messages = [];
-
-        msg.map((val, k) => {
-            messages.push({
-                _id: val.id,
-                createdAt: val.dateSent,
-                text: val.message,
-                user: val.userId === this.user._id ? this.user : this.otherUser,
-                sent: true,
-                received: true
-            })
-        });
-
-        return messages;
-    }
-
-
     onInputTextChange = (text: string) => {
 
         if (this.sentTypingMessageSignal && text.length > 0) {
             this.sentTypingMessageSignal = false
-            chatHubClient.sendTypingMessage(this.otherUser._id)
+            chatHubStore.sendTypingMessage(this.selectedDialog.otherUserId)
                 .finally(() => {
                     setTimeout(() => {
                         this.sentTypingMessageSignal = true
@@ -122,46 +101,12 @@ class ChatScreen extends React.Component<any, any> {
     }
 
     onLoadEarlier = () => {
-        this.setState(() => {
-            return {
-                isLoadingEarlier: true,
-            }
-        })
-        chatStore.loadEarlierChatMessagesForDialogId(this.selectedDialog.dialogId)
-            .then((response) => {
-                let messages = [];
-                messages = this.loadMessages(response);
-                // init with only system messages
-                this.setState((previousState: any) => {
-                    return {
-                        messages: GiftedChat.prepend(
-                            previousState.messages,
-                            messages,
-                            Platform.OS !== 'web',
-                        ),
-                        isLoadingEarlier: false,
-                        loadEarlier: true
-                    }
-                })
+        this.setState({ isLoadingEarlier: true });
+        chatStore.loadEarlierChatMessagesForDialogId(this.selectedDialog)
+            .then(() => {
+                this.setState({ isLoadingEarlier: false, loadEarlier: true })
             })
             .catch((e) => console.log(e.message));
-    }
-
-
-    markallMessageAsRead = (userId, isChatRead) => {
-        if (isChatRead && userId === this.otherUser._id) {
-            const list = this.state.messages
-            list.map((x: IMessage, i) => {
-                x.pending = false
-                x.sent = true
-                x.received = true
-            })
-            this.setState({ messages: list });
-            this.isOtherUserReadingChat = true
-        }
-        else{
-            this.isOtherUserReadingChat = false;
-        }
     }
 
     onSend = (messages: IMessage[] = []) => {
@@ -174,68 +119,21 @@ class ChatScreen extends React.Component<any, any> {
             userId: this.user._id,
         }
         const messageId = Date.now()
-        this.setState((previousState: any) => {
-            const sentMessages = [{ ...messages[0], _id: messageId, pending: true }]
-            return {
-                messages: GiftedChat.append(
-                    previousState.messages,
-                    sentMessages,
-                    Platform.OS !== 'web',
-                )
-            }
-        })
+        const sentMessages = [{ ...messages[0], _id: messageId, pending: true }]
 
-        chatHubClient.sendMessage(this.otherUser._id, userstore.user.userId, chatMessage)
+        chatStore.markMessageSent(this.selectedDialog.dialogId, sentMessages)
+
+        chatHubStore.sendMessage(this.selectedDialog.otherUserId, userstore.user.userId, chatMessage)
             .then(() => {
-                chatStore.updateDialogWithMessage(chatMessage, ScreenName.ChatScreen)
-                const list = this.state.messages
-                list.map((x: IMessage, i) => {
-                    if (x._id === messageId) {
-                        x.pending = false
-                        x.sent = true
-                        x.received = this.isOtherUserReadingChat
-                    }
-                })
-                this.setState({ messages: list });
+                chatStore.markMessageDelivered(this.selectedDialog.dialogId, sentMessages)
+                dialogsStore.updateDialogWithMessage(chatMessage);
             })
             .catch((e) => {
                 console.error(e.message);
             })
     }
 
-    private getAttachments(message: IChatMessage): IAttachments {
-        let attachments: IAttachments;
-        if (message.image) {
-            attachments.id = '123';
-            attachments.type = MediaType.Image;
-            attachments.url = "https://bloblstorage.azurewebsite.net/image123.jpg";
-            return attachments;
-        }
-        return null;
-    }
 
-    onReceive = (message: IMargonChatMessage) => {
-        // console.log("Message on chat scree:" + JSON.stringify(message))
-        this.setState((previousState: any) => {
-            return {
-                messages: GiftedChat.append(
-                    previousState.messages as any,
-                    [
-                        {
-                            _id: message.id,
-                            text: message.message,
-                            createdAt: message.dateSent,
-                            user: this.otherUser,
-                            sent: true,
-                            received: true
-                        },
-                    ],
-                    Platform.OS !== 'web',
-                ),
-                isTyping: false
-            }
-        })
-    }
 
     renderMessageImage = (props) => {
         return (
@@ -283,7 +181,7 @@ class ChatScreen extends React.Component<any, any> {
 
     setIsTypingFunc = (userId) => {
         console.log(`$User :${userId} is typing`);
-        if (this.otherUser._id === userId) {
+        if (this.selectedDialog.otherUserId === userId) {
             this.setState({
                 isTyping: !this.state.isTyping,
             })
@@ -326,55 +224,34 @@ class ChatScreen extends React.Component<any, any> {
             return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><Text>Loading...</Text></View>
         }
 
+        const chatMessages = chatStore.messagePerDialogsMap.get(this.selectedDialog.dialogId).slice();
+
         return (
             <View
                 style={{ flex: 1 }}
                 accessibilityLabel='main'
-                testID='main'
             >
                 <GiftedChat
-                    messages={this.state.messages}
+                    messages={chatMessages}
                     onSend={this.onSend}
-                    user={{
-                        _id: userstore.user.userId,
-                        name: userstore.user.firstName,
-                        avatar: userstore.user.profilePicUrl
-                    }}
+                    user={this.user}
                     scrollToBottom
                     loadEarlier={this.state.loadEarlier}
                     onLoadEarlier={this.onLoadEarlier}
                     isLoadingEarlier={this.state.isLoadingEarlier}
                     renderSend={this.renderSend}
                     renderMessageImage={this.renderMessageImage}
-                    isTyping={this.state.isTyping}
+                    isTyping={this.selectedDialog.isUserTyping}
                     renderBubble={this.renderBubble}
                     renderCustomView={this.renderCustomView}
                     infiniteScroll
                     onInputTextChanged={this.onInputTextChange}
                     renderAvatar={this.renderAvatarImage}
-                    renderAccessory={Platform.OS === 'web' ? null : this.renderAccessory}
+                    renderAccessory={this.renderAccessory}
                 />
             </View>
         );
     }
-
-
-    // private onSendFromUser = (messages: IMessage[] = []) => {
-    //     const createdAt = new Date()
-    //     const messagesToUpload = messages.map(message => ({
-    //         ...message,
-    //         user,
-    //         createdAt,
-    //         _id: Math.round(Math.random() * 1000000),
-    //     }))
-    //     this.onSend(messagesToUpload)
-    // }
-
-    // private onSend(messages) {
-    //     this.setState({
-    //         messages: GiftedChat.append(this.state.messages, messages)
-    //     });
-    // }
 }
 
 export default ChatScreen;

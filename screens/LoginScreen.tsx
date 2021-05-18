@@ -2,7 +2,7 @@ import { observer } from 'mobx-react';
 import React, { Component } from 'react';
 import { Text, View, Alert, Keyboard } from 'react-native';
 import { Input, Button } from 'react-native-elements';
-import { firebaseAuth } from '../api/firebase-config';
+// import { firebaseAuth } from '../api/firebase-config';
 import { margonAPI } from '../api/margon-server-api';
 import { Divider, CompatibleView, TextInput } from '../components/base-components';
 import { userstore } from '../stores/UserStore';

@@ -4,14 +4,9 @@ import { LogBox, Platform, RefreshControl } from 'react-native';
 import { StatusBar } from 'react-native';
 import { View, StyleSheet } from 'react-native';
 import { Avatar, ListItem, Text, Badge } from 'react-native-elements';
-import { Icon } from 'react-native-elements';
 import { ScrollView } from 'react-native-gesture-handler';
-import { chatHubClient } from '../chats/chat-client';
 import { IMargonChatMessage, ScreenName } from '../models/chat-models';
-import { chatStore } from '../stores/ChatStore';
-import { userstore } from '../stores/UserStore';
-
-const access = () => <Icon name='ellipsis-vertical-outline' type='ionicon' />;
+import { dialogsStore } from '../stores/DialogsStore';
 
 @observer
 class HomeScreen extends Component<any, any> {
@@ -31,16 +26,11 @@ class HomeScreen extends Component<any, any> {
     }
 
     componentDidMount() {
-        chatStore.loadDialogs();
-        chatHubClient.onMessageReceiveHomeFunc = this.onMessageReceive;
-    }
-
-    componentWillUnmount() {
-        chatHubClient.onMessageReceiveHomeFunc = null;
+        dialogsStore.loadDialogs();
     }
 
     onRefresh = () => {
-        chatStore.loadDialogs();
+        dialogsStore.loadDialogs();
     }
 
     timeBasedsort(a, b) {
@@ -48,7 +38,6 @@ class HomeScreen extends Component<any, any> {
     }
 
     onMessageReceive(message: IMargonChatMessage) {
-        chatStore.updateDialogWithMessage(message, ScreenName.HomeScreen);
     }
 
     render() {
@@ -57,28 +46,28 @@ class HomeScreen extends Component<any, any> {
             <ScrollView
                 refreshControl={
                     <RefreshControl
-                        refreshing={chatStore.isDialogsLoading}
+                        refreshing={dialogsStore.isDialogsLoading}
                         onRefresh={this.onRefresh}
                     />}
             >
                 <View>
                     {
-                        chatStore.dialogs.slice().sort(this.timeBasedsort).map((l, i) => (
+                        dialogsStore.dialogs.slice().sort(this.timeBasedsort).map((dialog, i) => (
                             <ListItem key={i} bottomDivider onPress={() => {
-                                this.props.navigation.navigate('Chat', l)
+                                this.props.navigation.navigate('Chat', dialog)
                             }}>
-                                <Avatar source={{ uri: l.photoUrl }} rounded onPress={() => {
-                                    this.props.navigation.navigate('ProfileImage', l.photoUrl)
+                                <Avatar source={{ uri: dialog.photoUrl }} rounded onPress={() => {
+                                    this.props.navigation.navigate('ProfileImage', dialog.photoUrl)
                                 }}>
-                                    {l.isUserOnline ? <Avatar.Accessory source={require('../assets/online-image.png')} /> : null}
+                                    {dialog.isUserOnline ? <Avatar.Accessory source={require('../assets/online-image.png')} /> : null}
                                 </Avatar>
                                 <ListItem.Content>
-                                    <ListItem.Title>{l.name}</ListItem.Title>
-                                    <ListItem.Subtitle>{l.lastMessage}</ListItem.Subtitle>
+                                    <ListItem.Title>{dialog.name}</ListItem.Title>
+                                    <ListItem.Subtitle>{dialog.lastMessage}</ListItem.Subtitle>
                                 </ListItem.Content>
                                 <View style={{ justifyContent: 'flex-end' }}>
-                                    {l.unreadMessageCount !== 0 ? <Badge value={l.unreadMessageCount} /> : null}
-                                    <Text style={styles.ratingText}>{this.getDate(l.lastMessageDateSent)}</Text>
+                                    {dialog.unreadMessageCount !== 0 ? <Badge value={dialog.unreadMessageCount} /> : null}
+                                    <Text style={styles.ratingText}>{this.getDate(dialog.lastMessageDateSent)}</Text>
                                 </View>
                             </ListItem>
                         ))

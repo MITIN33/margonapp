@@ -4,18 +4,12 @@ import HomeScreen from './HomeScreen';
 import ChatHistory from './ChatHistory';
 import AppTheme from '../theme/AppTheme';
 import StatusScreen from './StatusScreen';
-import { chatHubClient } from '../chats/chat-client';
 
 class TabNavigation extends Component {
 
 
     constructor(props) {
         super(props)
-    }
-
-
-    componentDidMount(){
-        chatHubClient.stetupConnection()
     }
 
     render() {
