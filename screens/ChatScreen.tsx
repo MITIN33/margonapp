@@ -64,12 +64,12 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
     componentWillUnmount() {
         this._isMounted = false
         chatHubStore.isUserReadingChat(this.selectedDialog.otherUserId, false);
+        dialogsStore.setUnMessageCountZero(this.selectedDialog.dialogId)
     }
 
     componentDidMount() {
         this._isMounted = true
         chatHubStore.isUserReadingChat(this.selectedDialog.otherUserId, true);
-        dialogsStore.setUnMessageCountZero(this.selectedDialog.dialogId)
         this.props.navigation.setOptions({ headerTitle: this.selectedDialog.name });
 
         chatStore.loadChatMessagesForDialogId(this.selectedDialog)
@@ -115,8 +115,7 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
             message: messages[0].text,
             dialogId: this.selectedDialog.dialogId,
             dateSent: Date.now(),
-            file: messages[0].image,
-            userId: this.user._id,
+            user: this.user,
         }
         const messageId = Date.now()
         const sentMessages = [{ ...messages[0], _id: messageId, pending: true }]
@@ -168,11 +167,7 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
         const createdAt = new Date()
         const messagesToUpload = messages.map(message => ({
             ...message,
-            user: {
-                _id: userstore.user.userId,
-                name: userstore.user.firstName,
-                avatar: userstore.user.profilePicUrl
-            },
+            user: this.user,
             createdAt,
             _id: Math.round(Math.random() * 1000000),
         }))
@@ -236,6 +231,9 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
                     onSend={this.onSend}
                     user={this.user}
                     scrollToBottom
+                    shouldUpdateMessage={(props, nextProps) =>
+                        props.currentMessage.received !== nextProps.currentMessage.received
+                    }
                     loadEarlier={this.state.loadEarlier}
                     onLoadEarlier={this.onLoadEarlier}
                     isLoadingEarlier={this.state.isLoadingEarlier}

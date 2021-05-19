@@ -37,9 +37,6 @@ class HomeScreen extends Component<any, any> {
         return b.lastMessageDateSent - a.lastMessageDateSent;
     }
 
-    onMessageReceive(message: IMargonChatMessage) {
-    }
-
     render() {
 
         return (
@@ -63,7 +60,7 @@ class HomeScreen extends Component<any, any> {
                                 </Avatar>
                                 <ListItem.Content>
                                     <ListItem.Title>{dialog.name}</ListItem.Title>
-                                    <ListItem.Subtitle>{dialog.lastMessage}</ListItem.Subtitle>
+                                    <ListItem.Subtitle>{dialog.isUserTyping ? 'typing...' : dialog.lastMessage}</ListItem.Subtitle>
                                 </ListItem.Content>
                                 <View style={{ justifyContent: 'flex-end' }}>
                                     {dialog.unreadMessageCount !== 0 ? <Badge value={dialog.unreadMessageCount} /> : null}

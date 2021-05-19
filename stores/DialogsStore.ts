@@ -1,9 +1,14 @@
 import { action, makeAutoObservable, observable } from "mobx";
 import { margonAPI } from "../api/margon-server-api";
-import { IDialogs, IMargonChatMessage, ScreenName } from "../models/chat-models";
+import { asyncStorage } from "../models/async-storage";
+import { IChatUser, IDialogs, IMargonChatMessage, ScreenName } from "../models/chat-models";
+import { userstore } from "./UserStore";
 
 
 class DialogsStore {
+
+
+    DIALOG_KEY = 'DIALOG_DATA';
 
     @observable
     public dialogs: IDialogs[] = []
@@ -29,6 +34,7 @@ class DialogsStore {
     @action
     public markDialogActive(dialogId) {
         this.dialogs.map(x => x.isActive = dialogId == x.dialogId)
+        // this.saveDialogData();
     }
 
     @action
@@ -45,13 +51,26 @@ class DialogsStore {
 
     @action
     public updateDialogWithMessage(chatMessage: IMargonChatMessage) {
-        this.dialogs.map(x => {
-            if (x.dialogId == chatMessage.dialogId) {
-                x.lastMessage = chatMessage.message
-                x.lastMessageDateSent = Date.now()
-                x.unreadMessageCount = chatMessage.userId === x.userId ? 0 : x.unreadMessageCount + 1
+        var dialog = this.dialogs.find(x => x.dialogId == chatMessage.dialogId);
+        if (dialog) {
+            dialog.lastMessage = chatMessage.message
+            dialog.lastMessageDateSent = Date.now()
+            dialog.unreadMessageCount = chatMessage.user._id === dialog.userId ? 0 : dialog.unreadMessageCount + 1
+        }
+        else {
+            var newDialog: IDialogs = {
+                dialogId: chatMessage.dialogId,
+                lastMessageDateSent: chatMessage.dateSent,
+                isUserOnline: true,
+                lastMessage: chatMessage.message,
+                unreadMessageCount: 1,
+                name: chatMessage.user.name,
+                photoUrl: chatMessage.user.avatar,
+                otherUserId: chatMessage.user._id,
+                userId: userstore.user.userId
             }
-        })
+            this.dialogs.push(newDialog)
+        }
     };
 
     @action
@@ -74,14 +93,31 @@ class DialogsStore {
 
     public loadDialogs() {
         this.setIsDialogLoading(true);
-        margonAPI.Dialogs().then((response) => {
-            if (response.data) {
-                this.setDialogList(response.data['items']);
-            }
-        }).catch((e) => console.log(e))
-            .finally(() => {
-                this.setIsDialogLoading(false);
-            });
+        asyncStorage.getData('DIALOG_DATA')
+            .then((data) => {
+                if (data) {
+                    this.setDialogList(data);
+                    this.setIsDialogLoading(false);
+                }
+                margonAPI.Dialogs().then((response) => {
+                    if (response.data) {
+                        var dialogsResponse = response.data['items']
+                        this.setDialogList(dialogsResponse);
+                        this.saveDialogData(dialogsResponse)
+                    }
+                }).
+                    catch((e) => console.log(e))
+                    .finally(() => {
+                        this.setIsDialogLoading(false);
+                    });
+            })
+            .catch((e) => {
+                console.log('Error in reading dialog data ' + e)
+            })
+    }
+
+    private saveDialogData(dialogs) {
+        asyncStorage.saveData(this.DIALOG_KEY, dialogs)
     }
 }
 

@@ -1,4 +1,3 @@
-
 export interface IDialogs {
     dialogId: string,
     name: string,
@@ -8,9 +7,9 @@ export interface IDialogs {
     unreadMessageCount: number,
     userId: string,
     otherUserId: string,
-    isUserOnline: boolean,
-    isActive: boolean,
-    isUserTyping: boolean
+    isUserOnline?: boolean,
+    isActive?: boolean,
+    isUserTyping?: boolean
 }
 export interface IChatRequest {
     message: string,
@@ -34,13 +33,13 @@ export interface IAuthResponse {
 
 export interface IMargonChatMessage {
     id?: string,
-    userId: string,
+    user: IChatUser,
     message: string,
     dialogId: string,
     readUserIds?: string[],
     deliveredUserIds?: string[],
     dateSent: number,
-    file: string,
+    attachments?: IAttachments,
 }
 
 export interface IChatUser {

@@ -61,7 +61,7 @@ class ChatStore {
         messages.map((x) => {
             if (x._id === chatMessage[0]._id) {
                 x.pending = false
-                x.received = true
+                x.received = this.isOtherUserReadingChat
                 x.sent = true
             }
         })
@@ -72,16 +72,13 @@ class ChatStore {
         this.isOtherUserReadingChat = isChatRead;
         if (isChatRead) {
             var dialogForUser = dialogsStore.dialogs.find(x => x.otherUserId === userId);
-            var messages = this.messagePerDialogsMap.get(dialogForUser.dialogId);
+            var messages = this.messagePerDialogsMap.get(dialogForUser.dialogId)
+            var newMessageList = []
             if (messages) {
-                messages.map((x) => {
-                    if (!x.received) {
-                        x.pending = false
-                        x.received = true
-                        x.sent = true
-                    }
+                messages.map(message => {
+                    newMessageList.push({ ...message, pending: false, sent: true, received: true })
                 })
-                this.setMessageForDialogId(dialogForUser.dialogId, messages);
+                this.setMessageForDialogId(dialogForUser.dialogId, newMessageList);
             }
         }
     }
@@ -126,19 +123,7 @@ class ChatStore {
             this.convertToLocaLChatMessages([message]),
             Platform.OS !== 'web',
         );
-
-        this.setIsUserTyping(null);
-
-        if (this.isOtherUserReadingChat) {
-            newMessageList.map(x => {
-                if (x._id == message.id) {
-                    x.received = true
-                    x.pending = false
-                    x.sent = true
-                }
-            });
-        }
-
+        this.setIsUserTyping(false);
         this.setMessageForDialogId(message.dialogId, newMessageList);
     }
 
@@ -167,9 +152,9 @@ class ChatStore {
                 _id: message.id,
                 createdAt: message.dateSent,
                 text: message.message,
-                user: this.getDialogUser(message.userId),
+                user: this.getDialogUser(message.user._id),
                 sent: message.deliveredUserIds.includes(dialogForUser.otherUserId),
-                received: message.readUserIds.includes(dialogForUser.dialogId)
+                received: message.readUserIds.includes(dialogForUser.otherUserId)
             })
         });
 

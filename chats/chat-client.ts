@@ -73,6 +73,10 @@ class ChatHubStore {
     public isUserReadingChat(thisUserId, isReading) {
         return connection.invoke("IsReadingChat", thisUserId, isReading)
     }
+
+    public isUserOnline(userId) {
+        return connection.invoke("IsUserOnline", userId)
+    }
 }
 
 
