@@ -5,11 +5,11 @@ import { StatusBar } from 'react-native';
 import { View, StyleSheet } from 'react-native';
 import { Avatar, ListItem, Text, Badge } from 'react-native-elements';
 import { ScrollView } from 'react-native-gesture-handler';
-import { IMargonChatMessage, ScreenName } from '../models/chat-models';
+import { chatStore } from '../stores/ChatStore';
 import { dialogsStore } from '../stores/DialogsStore';
 
 @observer
-class HomeScreen extends Component<any, any> {
+class ChatHistoryScreen extends Component<any, any> {
 
     private list: any = [];
     _isMounted: boolean;
@@ -115,4 +115,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default HomeScreen;
+export default ChatHistoryScreen;

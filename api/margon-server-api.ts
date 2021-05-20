@@ -19,6 +19,12 @@ class MargonAPI {
         return response;
     }
 
+    public async NearbyUsers() {
+        var authtoken = await authStore.Token();
+        var response = await margonServer.get('/users/nearby', { headers: { 'Authorization': `Bearer ${authtoken}` } });
+        return response;
+    }
+
     public async Dialogs() {
         var authtoken = await authStore.Token();
         var response = await margonServer.get('/dialogs', { params: { limit: 10 }, headers: { 'Authorization': `Bearer ${authtoken}` } });

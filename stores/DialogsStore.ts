@@ -32,9 +32,12 @@ class DialogsStore {
     }
 
     @action
-    public markDialogActive(dialogId) {
-        this.dialogs.map(x => x.isActive = dialogId == x.dialogId)
-        // this.saveDialogData();
+    public setUserIsReading(userId, isUserReading) {
+        this.dialogs.map(x => {
+            if (userId == x.userId) {
+                x.isUserReadingChat = isUserReading;
+            }
+        });
     }
 
     @action
@@ -50,7 +53,8 @@ class DialogsStore {
     }
 
     @action
-    public updateDialogWithMessage(chatMessage: IMargonChatMessage) {
+    public addMessageToDialog(chatMessage: IMargonChatMessage) {
+        // console.log('selected dialog id :' + chatMessage.dialogId);
         var dialog = this.dialogs.find(x => x.dialogId == chatMessage.dialogId);
         if (dialog) {
             dialog.lastMessage = chatMessage.message
@@ -58,18 +62,9 @@ class DialogsStore {
             dialog.unreadMessageCount = chatMessage.user._id === dialog.userId ? 0 : dialog.unreadMessageCount + 1
         }
         else {
-            var newDialog: IDialogs = {
-                dialogId: chatMessage.dialogId,
-                lastMessageDateSent: chatMessage.dateSent,
-                isUserOnline: true,
-                lastMessage: chatMessage.message,
-                unreadMessageCount: 1,
-                name: chatMessage.user.name,
-                photoUrl: chatMessage.user.avatar,
-                otherUserId: chatMessage.user._id,
-                userId: userstore.user.userId
-            }
-            this.dialogs.push(newDialog)
+            dialog = this.createDialog(chatMessage);
+            this.dialogs.push(dialog)
+            this.saveDialogData(this.dialogs);
         }
     };
 
@@ -90,6 +85,8 @@ class DialogsStore {
             }
         })
     };
+
+
 
     public loadDialogs() {
         this.setIsDialogLoading(true);
@@ -114,6 +111,25 @@ class DialogsStore {
             .catch((e) => {
                 console.log('Error in reading dialog data ' + e)
             })
+    }
+
+    public clearDialog() {
+        asyncStorage.removeKey(this.DIALOG_KEY, () => { });
+    }
+
+    private createDialog(chatMessage: IMargonChatMessage) {
+        var newDialog: IDialogs = {
+            dialogId: chatMessage.dialogId,
+            lastMessageDateSent: chatMessage.dateSent,
+            isUserOnline: true,
+            lastMessage: chatMessage.message,
+            unreadMessageCount: chatMessage.user._id == userstore.user.userId ? 0 : 1,
+            name: chatMessage.receiverUser.name,
+            photoUrl: chatMessage.receiverUser.avatar,
+            userId: chatMessage.user._id,
+            otherUserId: chatMessage.receiverUser._id
+        }
+        return newDialog;
     }
 
     private saveDialogData(dialogs) {

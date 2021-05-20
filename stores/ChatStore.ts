@@ -21,7 +21,6 @@ class ChatStore {
     @observable
     public isLoadingMessages: boolean;
 
-
     //private memebers
     private chatContinuationToken: string
 
@@ -49,34 +48,42 @@ class ChatStore {
     }
 
     public markMessageSent(dialogId: string, chatMessage: IMessage[]) {
-        this.setMessageForDialogId(dialogId, GiftedChat.append(
-            this.messagePerDialogsMap.get(dialogId),
-            chatMessage,
-            Platform.OS !== 'web'
-        ));
+        if (dialogId)
+            this.setMessageForDialogId(dialogId, GiftedChat.append(
+                this.messagePerDialogsMap.get(dialogId),
+                chatMessage,
+                Platform.OS !== 'web'
+            ));
     }
 
     public markMessageDelivered(dialogId: string, chatMessage: IMessage[]) {
-        var messages = this.messagePerDialogsMap.get(dialogId).slice();
-        messages.map((x) => {
-            if (x._id === chatMessage[0]._id) {
-                x.pending = false
-                x.received = this.isOtherUserReadingChat
-                x.sent = true
-            }
-        })
-        this.setMessageForDialogId(dialogId, messages);
+        if (this.messagePerDialogsMap.has(dialogId)) {
+            console.log('dialog present: ' + dialogId)
+            var messages = this.messagePerDialogsMap.get(dialogId).slice();
+            var dialogForUser = dialogsStore.dialogs.find(x => x.dialogId == dialogId)
+            messages.map((x) => {
+                if (x._id === chatMessage[0]._id) {
+                    x.pending = false
+                    x.received = dialogForUser.isUserReadingChat
+                    x.sent = true
+                }
+            })
+            this.setMessageForDialogId(dialogId, messages);
+        } else {
+            console.log('dialog absent: ' + dialogId)
+            this.setMessageForDialogId(dialogId, chatMessage);
+        }
     }
 
     public markAllMessageRead = (userId, isChatRead) => {
-        this.isOtherUserReadingChat = isChatRead;
+        dialogsStore.setUserIsReading(userId, isChatRead);
         if (isChatRead) {
             var dialogForUser = dialogsStore.dialogs.find(x => x.otherUserId === userId);
             var messages = this.messagePerDialogsMap.get(dialogForUser.dialogId)
             var newMessageList = []
             if (messages) {
                 messages.map(message => {
-                    newMessageList.push({ ...message, pending: false, sent: true, received: true })
+                    newMessageList.push({ ...message, pending: false, sent: true, received: dialogForUser.isUserReadingChat })
                 })
                 this.setMessageForDialogId(dialogForUser.dialogId, newMessageList);
             }
@@ -148,14 +155,16 @@ class ChatStore {
         let messages: IMessage[] = [];
         margonChatMessages.map((message, k) => {
             var dialogForUser = dialogsStore.dialogs.find(x => x.dialogId == message.dialogId)
-            messages.push({
-                _id: message.id,
-                createdAt: message.dateSent,
-                text: message.message,
-                user: this.getDialogUser(message.user._id),
-                sent: message.deliveredUserIds.includes(dialogForUser.otherUserId),
-                received: message.readUserIds.includes(dialogForUser.otherUserId)
-            })
+            if (dialogForUser) {
+                messages.push({
+                    _id: message.id,
+                    createdAt: message.dateSent,
+                    text: message.message,
+                    user: this.getDialogUser(message.user._id),
+                    sent: message.deliveredUserIds.includes(dialogForUser.otherUserId),
+                    received: message.readUserIds.includes(dialogForUser.otherUserId)
+                })
+            }
         });
 
         return messages;

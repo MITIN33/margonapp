@@ -8,7 +8,7 @@ import AccessoryBar from "../components/accessory-bar";
 import CustomView from "../components/custom-view";
 import AppTheme from "../theme/AppTheme";
 import { userstore } from "../stores/UserStore";
-import { IDialogs, IMargonChatMessage, ScreenName } from "../models/chat-models";
+import { IDialogs, IMargonChatMessage } from "../models/chat-models";
 import { chatStore } from "../stores/ChatStore";
 import { observer } from "mobx-react";
 import { dialogsStore } from "../stores/DialogsStore";
@@ -111,27 +111,38 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
 
     onSend = (messages: IMessage[] = []) => {
 
-        const chatMessage: IMargonChatMessage = {
-            message: messages[0].text,
-            dialogId: this.selectedDialog.dialogId,
-            dateSent: Date.now(),
-            user: this.user,
-        }
         const messageId = Date.now()
         const sentMessages = [{ ...messages[0], _id: messageId, pending: true }]
 
         chatStore.markMessageSent(this.selectedDialog.dialogId, sentMessages)
 
-        chatHubStore.sendMessage(this.selectedDialog.otherUserId, userstore.user.userId, chatMessage)
-            .then(() => {
+        chatHubStore.sendMessage(this.CreateMessageRequest(this.selectedDialog.dialogId, sentMessages))
+            .then((chatResponse) => {
+                if (!this.selectedDialog.dialogId) {
+                    this.selectedDialog.dialogId = chatResponse.dialogId
+                }
+                dialogsStore.addMessageToDialog(chatResponse);
                 chatStore.markMessageDelivered(this.selectedDialog.dialogId, sentMessages)
-                dialogsStore.updateDialogWithMessage(chatMessage);
             })
             .catch((e) => {
                 console.error(e.message);
             })
     }
 
+    CreateMessageRequest(dialogId, messages: IMessage[]) {
+        const msg: IMargonChatMessage = {
+            message: messages[0].text,
+            dialogId: dialogId,
+            dateSent: Date.now(),
+            user: this.user,
+            receiverUser: {
+                _id: this.selectedDialog.otherUserId,
+                name: this.selectedDialog.name,
+                avatar: this.selectedDialog.photoUrl
+            }
+        }
+        return msg;
+    }
 
 
     renderMessageImage = (props) => {
@@ -231,9 +242,6 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
                     onSend={this.onSend}
                     user={this.user}
                     scrollToBottom
-                    shouldUpdateMessage={(props, nextProps) =>
-                        props.currentMessage.received !== nextProps.currentMessage.received
-                    }
                     loadEarlier={this.state.loadEarlier}
                     onLoadEarlier={this.onLoadEarlier}
                     isLoadingEarlier={this.state.isLoadingEarlier}

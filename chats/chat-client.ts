@@ -1,5 +1,4 @@
 import * as signalR from '@microsoft/signalr';
-import { ToastAndroid } from 'react-native';
 import { authStore } from '../stores/AuthStore';
 import { chatStore } from '../stores/ChatStore';
 import { dialogsStore } from '../stores/DialogsStore';
@@ -20,11 +19,11 @@ connection.on("ReceiveError", (error) => {
 });
 
 connection.onreconnecting(() => {
-  ToastAndroid.show("You are offline", ToastAndroid.LONG);
+  console.log("You are offline");
 })
 
 connection.onreconnected(() => {
-  ToastAndroid.show("Back online", ToastAndroid.LONG);
+  console.log("Back online");
 })
 
 connection.onclose(() => {
@@ -33,7 +32,7 @@ connection.onclose(() => {
 
 connection.on("ReceiveMessage", (userId, message) => {
   chatStore.onMessageReceive(message);
-  dialogsStore.updateDialogWithMessage(message);
+  dialogsStore.addMessageToDialog(message);
 });
 
 
@@ -51,32 +50,37 @@ connection.on('IsTyping', (userId) => {
   dialogsStore.setUserIsTyping(userId, true);
 })
 
-if (connection.state === signalR.HubConnectionState.Disconnected) {
-  connection.start()
-    .then(() => console.log('SignalR connection started'))
-    .catch((error) => console.log("Error in establishing hub connection."));
-}
-else {
-  console.log(`CONNECTION ID: ALready in ${connection.state} state: ` + connection.connectionId);
-}
+
 
 
 class ChatHubStore {
-    public sendMessage(toUserId, senderUserId, message) {
-        return connection.invoke("SendMessage", toUserId, senderUserId, message)
-    }
 
-    public sendTypingMessage(toUserId) {
-        return connection.invoke("IsTyping", toUserId)
+  public connect() {
+    if (connection.state === signalR.HubConnectionState.Disconnected) {
+      connection.start()
+        .then(() => console.log('SignalR connection started'))
+        .catch((error) => console.log("Error in establishing hub connection."));
     }
+    else {
+      console.log(`CONNECTION ID: ALready in ${connection.state} state: ` + connection.connectionId);
+    }
+  }
 
-    public isUserReadingChat(thisUserId, isReading) {
-        return connection.invoke("IsReadingChat", thisUserId, isReading)
-    }
+  public sendMessage(message) {
+    return connection.invoke("SendMessage", message)
+  }
 
-    public isUserOnline(userId) {
-        return connection.invoke("IsUserOnline", userId)
-    }
+  public sendTypingMessage(toUserId) {
+    return connection.invoke("IsTyping", toUserId)
+  }
+
+  public isUserReadingChat(thisUserId, isReading) {
+    return connection.invoke("IsReadingChat", thisUserId, isReading)
+  }
+
+  public isUserOnline(userId) {
+    return connection.invoke("IsUserOnline", userId)
+  }
 }
 
 

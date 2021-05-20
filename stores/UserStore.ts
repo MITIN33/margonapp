@@ -16,6 +16,9 @@ class UserStore {
     @observable
     public isUserReadingChatMap: Map<string, boolean> = new Map<string, boolean>();
 
+    @observable
+    public isFetchingNearbyUser: boolean;
+
     //non-observable
     public user: UserModel = null;
     public userLoginRequest: UserLoginRequest = null;
@@ -28,6 +31,11 @@ class UserStore {
     @action
     public setIsUserLoading(value) {
         this.isUserloading = value;
+    }
+
+    @action
+    public setIsFetchingNearbyUsers(value) {
+        this.isFetchingNearbyUser = value;
     }
 
 
@@ -62,7 +70,7 @@ class UserStore {
         }
     }
 
-    public Logout = () =>{
+    public Logout = () => {
         authStore.setUserSignedIn(false);
     }
 }

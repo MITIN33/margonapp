@@ -8,7 +8,7 @@ export interface IDialogs {
     userId: string,
     otherUserId: string,
     isUserOnline?: boolean,
-    isActive?: boolean,
+    isUserReadingChat?: boolean,
     isUserTyping?: boolean
 }
 export interface IChatRequest {
@@ -40,6 +40,7 @@ export interface IMargonChatMessage {
     deliveredUserIds?: string[],
     dateSent: number,
     attachments?: IAttachments,
+    receiverUser?: IChatUser
 }
 
 export interface IChatUser {
