@@ -19,6 +19,12 @@ class MargonAPI {
         return response;
     }
 
+    public async ExitChat(dialogId) {
+        var authtoken = await authStore.Token();
+        var response = await margonServer.delete(`/dialogs/${dialogId}`, { headers: { 'Authorization': `Bearer ${authtoken}` } });
+        return response;
+    }
+
     public async NearbyUsers() {
         var authtoken = await authStore.Token();
         var response = await margonServer.get('/users/nearby', { headers: { 'Authorization': `Bearer ${authtoken}` } });

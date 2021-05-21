@@ -4,7 +4,6 @@ import { asyncStorage } from '../models/async-storage';
 import { clientConstants } from '../models/constants';
 import { UserLoginRequest, UserModel } from '../models/user-models';
 import { authStore } from './AuthStore';
-
 class UserStore {
 
     @observable
@@ -71,7 +70,11 @@ class UserStore {
     }
 
     public Logout = () => {
-        authStore.setUserSignedIn(false);
+        asyncStorage.removeKey('DIALOG_DATA', () => {
+            console.log('cleared cache data');
+            authStore.setUserSignedIn(false);
+        });
+
     }
 }
 

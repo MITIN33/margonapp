@@ -71,7 +71,7 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
         this._isMounted = true
         chatHubStore.isUserReadingChat(this.selectedDialog.otherUserId, true);
         this.props.navigation.setOptions({ headerTitle: this.selectedDialog.name });
-
+        chatStore.setDialogMessages([]);
         chatStore.loadChatMessagesForDialogId(this.selectedDialog)
             .then(() => {
                 if (this._isMounted) {
@@ -112,26 +112,25 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
     onSend = (messages: IMessage[] = []) => {
 
         const messageId = Date.now()
-        const sentMessages = [{ ...messages[0], _id: messageId, pending: true }]
+        const sentMessages = { ...messages[0], _id: messageId, pending: true }
 
-        chatStore.markMessageSent(this.selectedDialog.dialogId, sentMessages)
-
+        chatStore.addMessage(sentMessages)
         chatHubStore.sendMessage(this.CreateMessageRequest(this.selectedDialog.dialogId, sentMessages))
             .then((chatResponse) => {
-                if (!this.selectedDialog.dialogId) {
+                if(!this.selectedDialog.dialogId){
                     this.selectedDialog.dialogId = chatResponse.dialogId
                 }
                 dialogsStore.addMessageToDialog(chatResponse);
-                chatStore.markMessageDelivered(this.selectedDialog.dialogId, sentMessages)
+                chatStore.markMessageDelivered(sentMessages)
             })
             .catch((e) => {
                 console.error(e.message);
             })
     }
 
-    CreateMessageRequest(dialogId, messages: IMessage[]) {
+    CreateMessageRequest(dialogId, messages: IMessage) {
         const msg: IMargonChatMessage = {
-            message: messages[0].text,
+            message: messages.text,
             dialogId: dialogId,
             dateSent: Date.now(),
             user: this.user,
@@ -230,7 +229,7 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
             return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><Text>Loading...</Text></View>
         }
 
-        const chatMessages = chatStore.messagePerDialogsMap.get(this.selectedDialog.dialogId).slice();
+        // const chatMessages = chatStore.dialogMessages.slice();
 
         return (
             <View
@@ -238,7 +237,7 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
                 accessibilityLabel='main'
             >
                 <GiftedChat
-                    messages={chatMessages}
+                    messages={chatStore.dialogMessages.slice()}
                     onSend={this.onSend}
                     user={this.user}
                     scrollToBottom

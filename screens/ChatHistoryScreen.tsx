@@ -1,10 +1,12 @@
 import { observer } from 'mobx-react';
 import React, { Component } from 'react';
-import { LogBox, Platform, RefreshControl } from 'react-native';
+import { Alert, LogBox, Platform, RefreshControl, ToastAndroid } from 'react-native';
 import { StatusBar } from 'react-native';
 import { View, StyleSheet } from 'react-native';
 import { Avatar, ListItem, Text, Badge } from 'react-native-elements';
 import { ScrollView } from 'react-native-gesture-handler';
+import { margonServer } from '../api/axios-instance';
+import { margonAPI } from '../api/margon-server-api';
 import { chatStore } from '../stores/ChatStore';
 import { dialogsStore } from '../stores/DialogsStore';
 
@@ -37,6 +39,25 @@ class ChatHistoryScreen extends Component<any, any> {
         return b.lastMessageDateSent - a.lastMessageDateSent;
     }
 
+    onLongPressAction(dialog) {
+        Alert.alert('Exit Chat', 'Sure you want to Exit?', [
+            {
+                text: "Cancel",
+                onPress: () => console.log("Cancel Pressed")
+            },
+            {
+                text: "OK", onPress: () => {
+                    margonAPI.ExitChat(dialog.dialogId)
+                        .then(() => {
+                            ToastAndroid.show('Exit from group completed', ToastAndroid.LONG);
+                        })
+                }
+            }
+        ])
+
+    }
+
+
     render() {
 
         return (
@@ -50,9 +71,11 @@ class ChatHistoryScreen extends Component<any, any> {
                 <View>
                     {
                         dialogsStore.dialogs.slice().sort(this.timeBasedsort).map((dialog, i) => (
-                            <ListItem key={i} bottomDivider onPress={() => {
-                                this.props.navigation.navigate('Chat', dialog)
-                            }}>
+                            <ListItem key={i} bottomDivider
+                                onLongPress={() => this.onLongPressAction(dialog)}
+                                onPress={() => {
+                                    this.props.navigation.navigate('Chat', dialog)
+                                }}>
                                 <Avatar source={{ uri: dialog.photoUrl }} rounded onPress={() => {
                                     this.props.navigation.navigate('ProfileImage', dialog.photoUrl)
                                 }}>

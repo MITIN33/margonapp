@@ -10,7 +10,7 @@ import { userstore } from "./UserStore";
 class ChatStore {
 
     @observable
-    public messagePerDialogsMap: Map<string, IMessage[]> = new Map()
+    public dialogMessages: IMessage[] = []
 
     @observable
     public isOtherUserReadingChat: boolean;
@@ -33,8 +33,8 @@ class ChatStore {
     }
 
     @action
-    public setMessageForDialogId(dialogId, messages) {
-        this.messagePerDialogsMap.set(dialogId, messages);
+    public setDialogMessages(messages) {
+        this.dialogMessages = messages;
     }
 
     @action
@@ -47,56 +47,49 @@ class ChatStore {
         this.isLoadingMessages = value
     }
 
-    public markMessageSent(dialogId: string, chatMessage: IMessage[]) {
-        if (dialogId)
-            this.setMessageForDialogId(dialogId, GiftedChat.append(
-                this.messagePerDialogsMap.get(dialogId),
-                chatMessage,
-                Platform.OS !== 'web'
-            ));
+    @action
+    public addMessage(chatMessage: IMessage) {
+        var newMessageList = GiftedChat.append(
+            this.dialogMessages,
+            [chatMessage],
+            Platform.OS !== 'web',
+        )
+        this.setDialogMessages(newMessageList);
     }
 
-    public markMessageDelivered(dialogId: string, chatMessage: IMessage[]) {
-        if (this.messagePerDialogsMap.has(dialogId)) {
-            console.log('dialog present: ' + dialogId)
-            var messages = this.messagePerDialogsMap.get(dialogId).slice();
-            var dialogForUser = dialogsStore.dialogs.find(x => x.dialogId == dialogId)
-            messages.map((x) => {
-                if (x._id === chatMessage[0]._id) {
-                    x.pending = false
-                    x.received = dialogForUser.isUserReadingChat
-                    x.sent = true
-                }
+    public markMessageDelivered(chatMessage: IMessage) {
+        var newList = []
+        this.dialogMessages.map(x => {
+            newList.push({
+                ...x,
+                pending: false,
+                received: x.received,
+                sent: true
             })
-            this.setMessageForDialogId(dialogId, messages);
-        } else {
-            console.log('dialog absent: ' + dialogId)
-            this.setMessageForDialogId(dialogId, chatMessage);
-        }
+        })
+        this.setDialogMessages(newList);
     }
 
-    public markAllMessageRead = (userId, isChatRead) => {
-        dialogsStore.setUserIsReading(userId, isChatRead);
-        if (isChatRead) {
-            var dialogForUser = dialogsStore.dialogs.find(x => x.otherUserId === userId);
-            var messages = this.messagePerDialogsMap.get(dialogForUser.dialogId)
-            var newMessageList = []
-            if (messages) {
-                messages.map(message => {
-                    newMessageList.push({ ...message, pending: false, sent: true, received: dialogForUser.isUserReadingChat })
-                })
-                this.setMessageForDialogId(dialogForUser.dialogId, newMessageList);
-            }
-        }
+    @action
+    public markAllMessageRead(userId, isChatRead) {
+        var newList = []
+        this.dialogMessages.map(x => {
+            newList.push({
+                ...x,
+                pending: false,
+                received: true,
+                sent: true
+            })
+        })
+
+        this.setDialogMessages(newList);
     }
 
     public async loadChatMessagesForDialogId(dialog: IDialogs) {
         try {
             var response = await margonAPI.GetChatList(dialog.dialogId, null)
-            let messages: IMessage[] = [];
             if (response.data) {
-                messages = this.convertToLocaLChatMessages(response.data['items']);
-                this.setMessageForDialogId(dialog.dialogId, messages)
+                this.dialogMessages = this.convertToLocaLChatMessages(response.data['items']);
                 this.chatContinuationToken = response.data['continuationToken'];
             }
         } catch (error) {
@@ -106,50 +99,35 @@ class ChatStore {
 
     public async loadEarlierChatMessagesForDialogId(dialog: IDialogs) {
 
-        try {
-            var response = await margonAPI.GetChatList(dialog.dialogId, this.chatContinuationToken)
-            let messages: IMessage[] = [];
-            if (response.data) {
-                messages = GiftedChat.prepend(
-                    this.messagePerDialogsMap.get(dialog.dialogId),
-                    this.convertToLocaLChatMessages(response.data['items']),
-                    Platform.OS !== 'web',
-                )
-                this.setMessageForDialogId(dialog.dialogId, messages)
-                this.chatContinuationToken = response.data['continuationToken'];
+        if (this.chatContinuationToken) {
+            try {
+                var response = await margonAPI.GetChatList(dialog.dialogId, this.chatContinuationToken)
+                let messages: IMessage[] = [];
+                if (response.data) {
+                    messages = GiftedChat.prepend(
+                        this.dialogMessages,
+                        this.convertToLocaLChatMessages(response.data['items']),
+                        Platform.OS !== 'web',
+                    )
+                    this.setDialogMessages(messages);
+                    this.chatContinuationToken = response.data['continuationToken'];
+                }
+            } catch (error) {
+                throw error;
             }
-        } catch (error) {
-            throw error;
         }
     }
 
     public onMessageReceive = (message: IMargonChatMessage) => {
-
         var newMessageList = GiftedChat.append(
-            this.messagePerDialogsMap.get(message.dialogId),
+            this.dialogMessages,
             this.convertToLocaLChatMessages([message]),
             Platform.OS !== 'web',
         );
+        this.setDialogMessages(newMessageList);
         this.setIsUserTyping(false);
-        this.setMessageForDialogId(message.dialogId, newMessageList);
     }
 
-
-    /*
-    *Private methods
-    */
-
-    private saveChatToLocalStore(messagePerDialogMap) {
-        asyncStorage.saveData('CHAT_DATA', messagePerDialogMap)
-    }
-
-    private async loadchatForDialogFromLocalStore() {
-        try {
-            this.messagePerDialogsMap = await asyncStorage.getData('CHAT_DATA')
-        } catch (error) {
-            throw error;
-        }
-    }
 
     private convertToLocaLChatMessages(margonChatMessages: IMargonChatMessage[]) {
         let messages: IMessage[] = [];

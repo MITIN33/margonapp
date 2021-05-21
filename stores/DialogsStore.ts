@@ -90,7 +90,7 @@ class DialogsStore {
 
     public loadDialogs() {
         this.setIsDialogLoading(true);
-        asyncStorage.getData('DIALOG_DATA')
+        asyncStorage.getData(this.DIALOG_KEY)
             .then((data) => {
                 if (data) {
                     this.setDialogList(data);
@@ -111,10 +111,6 @@ class DialogsStore {
             .catch((e) => {
                 console.log('Error in reading dialog data ' + e)
             })
-    }
-
-    public clearDialog() {
-        asyncStorage.removeKey(this.DIALOG_KEY, () => { });
     }
 
     private createDialog(chatMessage: IMargonChatMessage) {
