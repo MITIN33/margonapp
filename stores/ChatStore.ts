@@ -23,8 +23,6 @@ class ChatStore {
 
     //private memebers
     private chatContinuationToken: string
-
-
     /**
      *
      */
@@ -57,44 +55,64 @@ class ChatStore {
         this.setDialogMessages(newMessageList);
     }
 
-    public markMessageDelivered(chatMessage: IMessage) {
+    public markMessageDelivered(dialogId: string) {
         var newList = []
+        var dialogForUser = dialogsStore.dialogs.find(x => x.dialogId == dialogId);
         this.dialogMessages.map(x => {
             newList.push({
                 ...x,
                 pending: false,
-                received: x.received,
+                received: dialogForUser.isUserReadingChat ? true : x.received,
                 sent: true
             })
         })
         this.setDialogMessages(newList);
     }
 
-    @action
     public markAllMessageRead(userId, isChatRead) {
         var newList = []
-        this.dialogMessages.map(x => {
-            newList.push({
-                ...x,
-                pending: false,
-                received: true,
-                sent: true
+        dialogsStore.setUserIsReading(userId, isChatRead);
+        if (isChatRead) {
+            this.dialogMessages.map(x => {
+                newList.push({
+                    ...x,
+                    pending: false,
+                    received: true,
+                    sent: true
+                })
             })
-        })
+            this.setDialogMessages(newList);
+        }
+    }
 
-        this.setDialogMessages(newList);
+    public async sendMessage(message) {
+        var messageResponse = await margonAPI.SendMessage(message);
+        return messageResponse.data;
     }
 
     public async loadChatMessagesForDialogId(dialog: IDialogs) {
         try {
-            var response = await margonAPI.GetChatList(dialog.dialogId, null)
-            if (response.data) {
-                this.dialogMessages = this.convertToLocaLChatMessages(response.data['items']);
-                this.chatContinuationToken = response.data['continuationToken'];
-            }
+
+            this.setIsLoadingMessage(true);
+            this.getChat(dialog.dialogId)
+                .then((data) => {
+                    if (data !== null) {
+                        this.setDialogMessages(data);
+                        this.setIsLoadingMessage(false);
+                    }
+                    margonAPI.GetChatList(dialog.dialogId, null)
+                        .then((response) => {
+                            if (response.data) {
+                                this.setDialogMessages(this.convertToLocaLChatMessages(response.data['items']));
+                                this.chatContinuationToken = response.data['continuationToken'];
+                                this.saveChat(dialog.dialogId, this.dialogMessages);
+                            }
+                        })
+                });
         } catch (error) {
             throw error;
         }
+        this.setIsLoadingMessage(false);
     }
 
     public async loadEarlierChatMessagesForDialogId(dialog: IDialogs) {
@@ -110,6 +128,7 @@ class ChatStore {
                         Platform.OS !== 'web',
                     )
                     this.setDialogMessages(messages);
+                    this.saveChat(dialog.dialogId, this.dialogMessages);
                     this.chatContinuationToken = response.data['continuationToken'];
                 }
             } catch (error) {
@@ -128,6 +147,15 @@ class ChatStore {
         this.setIsUserTyping(false);
     }
 
+    private saveChat(dialogId: string, messages: IMessage[]) {
+        asyncStorage.saveData(dialogId, messages);
+    }
+
+
+    private async getChat(dialogId) {
+        var data = await asyncStorage.getData(dialogId)
+        return data;
+    }
 
     private convertToLocaLChatMessages(margonChatMessages: IMargonChatMessage[]) {
         let messages: IMessage[] = [];

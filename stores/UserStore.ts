@@ -4,6 +4,8 @@ import { asyncStorage } from '../models/async-storage';
 import { clientConstants } from '../models/constants';
 import { UserLoginRequest, UserModel } from '../models/user-models';
 import { authStore } from './AuthStore';
+import { chatStore } from './ChatStore';
+import { dialogsStore } from './DialogsStore';
 class UserStore {
 
     @observable
@@ -70,11 +72,11 @@ class UserStore {
     }
 
     public Logout = () => {
-        asyncStorage.removeKey('DIALOG_DATA', () => {
-            console.log('cleared cache data');
-            authStore.setUserSignedIn(false);
-        });
-
+        margonAPI.Logout().then(() => {
+            asyncStorage.clearAllData(() => {
+                authStore.setUserSignedIn(false);
+            })
+        })
     }
 }
 

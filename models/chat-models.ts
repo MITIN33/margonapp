@@ -5,8 +5,8 @@ export interface IDialogs {
     lastMessage: string,
     lastMessageDateSent: number,
     unreadMessageCount: number,
-    userId: string,
     otherUserId: string,
+    occupantsUserRef?: IChatUser[],
     isUserOnline?: boolean,
     isUserReadingChat?: boolean,
     isUserTyping?: boolean

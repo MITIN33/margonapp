@@ -92,6 +92,7 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
         if (this.sentTypingMessageSignal && text.length > 0) {
             this.sentTypingMessageSignal = false
             chatHubStore.sendTypingMessage(this.selectedDialog.otherUserId)
+                .catch(() => console.log('Error in sendingmessage'))
                 .finally(() => {
                     setTimeout(() => {
                         this.sentTypingMessageSignal = true
@@ -115,13 +116,13 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
         const sentMessages = { ...messages[0], _id: messageId, pending: true }
 
         chatStore.addMessage(sentMessages)
-        chatHubStore.sendMessage(this.CreateMessageRequest(this.selectedDialog.dialogId, sentMessages))
+        chatStore.sendMessage(this.CreateMessageRequest(this.selectedDialog.dialogId, sentMessages))
             .then((chatResponse) => {
-                if(!this.selectedDialog.dialogId){
+                if (!this.selectedDialog.dialogId) {
                     this.selectedDialog.dialogId = chatResponse.dialogId
                 }
                 dialogsStore.addMessageToDialog(chatResponse);
-                chatStore.markMessageDelivered(sentMessages)
+                chatStore.markMessageDelivered(this.selectedDialog.dialogId)
             })
             .catch((e) => {
                 console.error(e.message);
@@ -221,15 +222,23 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
         }}
             {...props} />
     }
+    renderLoading() {
+        if (chatStore.isLoadingMessages)
+            return (
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><ActivityIndicator size='large' color={AppTheme.colors.themeColor} /></View>
+            )
+    }
 
     render() {
 
 
-        if (this.state.isLoading) {
-            return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><Text>Loading...</Text></View>
-        }
 
-        // const chatMessages = chatStore.dialogMessages.slice();
+
+        if (chatStore.isLoadingMessages) {
+            return (
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><ActivityIndicator size='large' color={AppTheme.colors.themeColor} /></View>
+            )
+        }
 
         return (
             <View

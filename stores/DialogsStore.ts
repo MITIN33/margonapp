@@ -11,7 +11,7 @@ class DialogsStore {
     DIALOG_KEY = 'DIALOG_DATA';
 
     @observable
-    public dialogs: IDialogs[] = []
+    public dialogs: IDialogs[] = [];
 
     @observable
     public isDialogsLoading = true;
@@ -34,7 +34,7 @@ class DialogsStore {
     @action
     public setUserIsReading(userId, isUserReading) {
         this.dialogs.map(x => {
-            if (userId == x.userId) {
+            if (userId == x.otherUserId) {
                 x.isUserReadingChat = isUserReading;
             }
         });
@@ -54,14 +54,14 @@ class DialogsStore {
 
     @action
     public addMessageToDialog(chatMessage: IMargonChatMessage) {
-        // console.log('selected dialog id :' + chatMessage.dialogId);
         var dialog = this.dialogs.find(x => x.dialogId == chatMessage.dialogId);
         if (dialog) {
             dialog.lastMessage = chatMessage.message
             dialog.lastMessageDateSent = Date.now()
-            dialog.unreadMessageCount = chatMessage.user._id === dialog.userId ? 0 : dialog.unreadMessageCount + 1
+            dialog.unreadMessageCount = chatMessage.user._id === userstore.user.userId ? 0 : dialog.unreadMessageCount + 1
         }
         else {
+            console.log('Creating new dialog ' + chatMessage.user.name)
             dialog = this.createDialog(chatMessage);
             this.dialogs.push(dialog)
             this.saveDialogData(this.dialogs);
@@ -92,7 +92,7 @@ class DialogsStore {
         this.setIsDialogLoading(true);
         asyncStorage.getData(this.DIALOG_KEY)
             .then((data) => {
-                if (data) {
+                if (data !== null) {
                     this.setDialogList(data);
                     this.setIsDialogLoading(false);
                 }
@@ -114,17 +114,25 @@ class DialogsStore {
     }
 
     private createDialog(chatMessage: IMargonChatMessage) {
+       
+        let user: IChatUser
+        if (chatMessage.user._id == userstore.user.userId) {
+            user = chatMessage.receiverUser;
+        } else {
+            user = chatMessage.user
+        }
+
         var newDialog: IDialogs = {
             dialogId: chatMessage.dialogId,
             lastMessageDateSent: chatMessage.dateSent,
             isUserOnline: true,
             lastMessage: chatMessage.message,
             unreadMessageCount: chatMessage.user._id == userstore.user.userId ? 0 : 1,
-            name: chatMessage.receiverUser.name,
-            photoUrl: chatMessage.receiverUser.avatar,
-            userId: chatMessage.user._id,
-            otherUserId: chatMessage.receiverUser._id
+            name: user.name,
+            photoUrl: user.avatar,
+            otherUserId: user._id
         }
+
         return newDialog;
     }
 
