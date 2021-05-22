@@ -1,8 +1,11 @@
 import { action, makeObservable, observable } from "mobx";
 import { margonServer } from "../api/axios-instance";
+import { margonAPI } from "../api/margon-server-api";
 import { asyncStorage } from "../models/async-storage";
 import { IAuthResponse } from "../models/chat-models";
 import { clientConstants } from "../models/constants";
+import { chatStore } from "./ChatStore";
+import { dialogsStore } from "./DialogsStore";
 
 class AuthStore {
 

@@ -102,10 +102,10 @@ class LoginScreen extends Component<any, any> {
     }
 
     sendCode = async (phoneNumber) => {
-        console.log('sending code to number')
-        const result = await firebaseAuth.signInWithPhoneNumber(phoneNumber);
-        this.confirmation = result;
-        console.log('code sent')
+        // console.log('sending code to number')
+        // const result = await firebaseAuth.signInWithPhoneNumber(phoneNumber);
+        // this.confirmation = result;
+        // console.log('code sent')
     }
 
 

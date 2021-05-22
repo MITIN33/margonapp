@@ -26,6 +26,12 @@ class AsyncStorageHelper {
             .then(() => callback())
             .catch((err) => console.log(err));
     }
+
+    public clearAllData(callback) {
+        AsyncStorage.clear()
+            .then(() => callback())
+            .catch((err) => console.log(err));
+    }
 }
 
 export const asyncStorage = new AsyncStorageHelper();

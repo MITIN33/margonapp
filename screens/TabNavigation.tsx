@@ -3,17 +3,20 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import ChatHistoryScreen from './ChatHistoryScreen';
 import OnlineUsersScreen from './OnlineUsersScreen';
 import AppTheme from '../theme/AppTheme';
-import StatusScreen from './StatusScreen';
 import { chatHubStore } from '../chats/chat-client';
+import { AppState } from 'react-native';
 
 class TabNavigation extends Component {
 
 
     constructor(props) {
         super(props)
+        this.state = {
+            appState: AppState.currentState,
+        }
     }
 
-    componentDidMount(){
+    componentDidMount() {
         chatHubStore.connect();
     }
 

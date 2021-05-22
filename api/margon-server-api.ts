@@ -19,9 +19,21 @@ class MargonAPI {
         return response;
     }
 
+    public async Logout() {
+        var authtoken = await authStore.Token();
+        var response = await margonServer.get(`/auth/logout`, { headers: { 'Authorization': `Bearer ${authtoken}` } });
+        return response;
+    }
+
     public async ExitChat(dialogId) {
         var authtoken = await authStore.Token();
         var response = await margonServer.delete(`/dialogs/${dialogId}`, { headers: { 'Authorization': `Bearer ${authtoken}` } });
+        return response;
+    }
+
+    public async SendMessage(message) {
+        var authtoken = await authStore.Token();
+        var response = await margonServer.post(`/chats`, message, { headers: { 'Authorization': `Bearer ${authtoken}` } });
         return response;
     }
 

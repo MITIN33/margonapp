@@ -15,6 +15,9 @@ import {
     takePictureAsync,
 } from '../components/media-utils';
 import { ScrollView } from 'react-native-gesture-handler';
+import { dialogsStore } from '../stores/DialogsStore';
+import { chatStore } from '../stores/ChatStore';
+import { authStore } from '../stores/AuthStore';
 
 @observer
 class SettingsScreen extends Component<any, any> {
@@ -92,7 +95,14 @@ class SettingsScreen extends Component<any, any> {
                 text: "Cancel",
                 onPress: () => console.log("Cancel Pressed")
             },
-            { text: "OK", onPress: userstore.Logout }
+            {
+                text: "OK", onPress: () => {
+                    dialogsStore.setDialogList([]);
+                    chatStore.setDialogMessages([]);
+                    userstore.Logout()
+                }
+
+            }
         ]);
     };
 
@@ -111,7 +121,7 @@ class SettingsScreen extends Component<any, any> {
         const userFullName = currentUser.firstName + ' ' + (currentUser.lastName ? currentUser.lastName : '');
         return (
             <ScrollView>
-                <View style={{ flex: 1, justifyContent: 'center', marginTop: 20, marginBottom: 20, alignItems: 'center'}}>
+                <View style={{ flex: 1, justifyContent: 'center', marginTop: 20, marginBottom: 20, alignItems: 'center' }}>
                     <Avatar onPress={this.OnHandleImageClick} size={85} source={{ uri: currentUser.profilePicUrl }} rounded >
                         <Avatar.Accessory onPress={this.OnHandleEdit} size={20} source={require('../assets/edit-icon.png')} />
                     </Avatar>
