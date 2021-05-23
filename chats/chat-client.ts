@@ -2,6 +2,7 @@ import * as signalR from '@microsoft/signalr';
 import { authStore } from '../stores/AuthStore';
 import { chatStore } from '../stores/ChatStore';
 import { dialogsStore } from '../stores/DialogsStore';
+import { locationStore } from '../stores/LocationStore';
 
 const chatHubUrl = "http://margonserver.azurewebsites.net/chatHub";
 
@@ -51,12 +52,20 @@ class ChatHubStore {
   public connect = () => {
     if (connection.state === signalR.HubConnectionState.Disconnected) {
       connection.start()
-        .then(() => console.log('SignalR connection started'))
+        .then(() => {
+          console.log('SignalR connection started')
+          locationStore.watchLocationAsync();
+        })
         .catch((error) => console.log("Error in establishing hub connection."));
     }
     else {
       console.log(`Connection: ${connection.connectionId} is already in ${connection.state} state`);
     }
+  }
+
+  public async sendMessage(message) {
+    var response = await connection.invoke("SendMessage", message)
+    return response;
   }
 
   public async sendTypingMessage(toUserId) {

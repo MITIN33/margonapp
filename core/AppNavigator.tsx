@@ -17,6 +17,7 @@ import VerificationScreen from "../screens/VerificationScreen";
 import { authStore } from "../stores/AuthStore";
 import { Button } from 'react-native-elements';
 import ProfileImageScreen from "../screens/ProfileImageScreen";
+import { locationStore } from "../stores/LocationStore";
 
 const Stack = createStackNavigator();
 
@@ -34,6 +35,7 @@ class AppNavigator extends Component<any, any> {
         userstore.init()
             .finally(() => this.setState({ isLoading: false }))
     }
+
     render() {
         if (this.state.isLoading) {
             return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><ActivityIndicator /></View>

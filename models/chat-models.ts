@@ -9,7 +9,8 @@ export interface IDialogs {
     occupantsUserRef?: IChatUser[],
     isUserOnline?: boolean,
     isUserReadingChat?: boolean,
-    isUserTyping?: boolean
+    isUserTyping?: boolean,
+    isArchived?: boolean
 }
 export interface IChatRequest {
     message: string,

@@ -66,6 +66,7 @@ class DialogsStore {
             this.dialogs.push(dialog)
             this.saveDialogData(this.dialogs);
         }
+        this.setUserIsTyping(dialog.otherUserId, false);
     };
 
     @action
@@ -114,7 +115,7 @@ class DialogsStore {
     }
 
     private createDialog(chatMessage: IMargonChatMessage) {
-       
+
         let user: IChatUser
         if (chatMessage.user._id == userstore.user.userId) {
             user = chatMessage.receiverUser;
@@ -136,8 +137,10 @@ class DialogsStore {
         return newDialog;
     }
 
-    private saveDialogData(dialogs) {
-        asyncStorage.saveData(this.DIALOG_KEY, dialogs)
+    private saveDialogData(dialogs: IDialogs[]) {
+        var list = dialogs.slice();
+        list.map(x => x.isUserOnline = false);
+        asyncStorage.saveData(this.DIALOG_KEY, list)
     }
 }
 

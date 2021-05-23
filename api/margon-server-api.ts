@@ -37,6 +37,18 @@ class MargonAPI {
         return response;
     }
 
+    public async sendLocation(location) {
+        var authtoken = await authStore.Token();
+        var response = await margonServer.post(`/users/location`, location, { headers: { 'Authorization': `Bearer ${authtoken}` } });
+        return response;
+    }
+
+    public async updateUser(user) {
+        var authtoken = await authStore.Token();
+        var response = await margonServer.post(`/users`, user, { headers: { 'Authorization': `Bearer ${authtoken}` } });
+        return response;
+    }
+
     public async NearbyUsers() {
         var authtoken = await authStore.Token();
         var response = await margonServer.get('/users/nearby', { headers: { 'Authorization': `Bearer ${authtoken}` } });

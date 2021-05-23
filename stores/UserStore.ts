@@ -2,7 +2,7 @@ import { action, makeObservable, observable } from 'mobx';
 import { margonAPI } from '../api/margon-server-api';
 import { asyncStorage } from '../models/async-storage';
 import { clientConstants } from '../models/constants';
-import { UserLoginRequest, UserModel } from '../models/user-models';
+import { UserLoginRequest, IUser } from '../models/user-models';
 import { authStore } from './AuthStore';
 import { chatStore } from './ChatStore';
 import { dialogsStore } from './DialogsStore';
@@ -21,7 +21,7 @@ class UserStore {
     public isFetchingNearbyUser: boolean;
 
     //non-observable
-    public user: UserModel = null;
+    public user: IUser = null;
     public userLoginRequest: UserLoginRequest = null;
 
     constructor() {

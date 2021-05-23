@@ -1,6 +1,6 @@
 import { View, Platform, ActivityIndicator, Text } from "react-native";
 import React from "react";
-import { Bubble, GiftedChat, IMessage, Send } from "react-native-gifted-chat";
+import { Bubble, GiftedChat, IMessage, InputToolbar, Send } from "react-native-gifted-chat";
 import { Avatar, Image } from 'react-native-elements';
 import { StatusBar } from "react-native";
 import { MaterialIcons } from '@expo/vector-icons'
@@ -13,6 +13,7 @@ import { chatStore } from "../stores/ChatStore";
 import { observer } from "mobx-react";
 import { dialogsStore } from "../stores/DialogsStore";
 import { chatHubStore } from "../chats/chat-client";
+import { DisabledChatToolbar } from "../components/base-components";
 
 export interface IChatScreenSettingStore {
     inverted: boolean,
@@ -71,7 +72,6 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
         this._isMounted = true
         chatHubStore.isUserReadingChat(this.selectedDialog.otherUserId, true);
         this.props.navigation.setOptions({ headerTitle: this.selectedDialog.name });
-        chatStore.setDialogMessages([]);
         chatStore.loadChatMessagesForDialogId(this.selectedDialog)
             .then(() => {
                 if (this._isMounted) {
@@ -116,7 +116,7 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
         const sentMessages = { ...messages[0], _id: messageId, pending: true }
 
         chatStore.addMessage(sentMessages)
-        chatStore.sendMessage(this.CreateMessageRequest(this.selectedDialog.dialogId, sentMessages))
+        chatHubStore.sendMessage(this.CreateMessageRequest(this.selectedDialog.dialogId, sentMessages))
             .then((chatResponse) => {
                 if (!this.selectedDialog.dialogId) {
                     this.selectedDialog.dialogId = chatResponse.dialogId
@@ -229,6 +229,8 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
             )
     }
 
+
+
     render() {
 
 
@@ -254,6 +256,7 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
                     onLoadEarlier={this.onLoadEarlier}
                     isLoadingEarlier={this.state.isLoadingEarlier}
                     renderSend={this.renderSend}
+                    renderInputToolbar={this.selectedDialog.isArchived ? () => <DisabledChatToolbar /> : undefined}
                     renderMessageImage={this.renderMessageImage}
                     isTyping={this.selectedDialog.isUserTyping}
                     renderBubble={this.renderBubble}

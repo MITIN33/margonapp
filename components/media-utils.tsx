@@ -1,9 +1,9 @@
 import { Linking } from 'expo'
-import * as Location from 'expo-location'
 import * as Permissions from 'expo-permissions'
 import * as ImagePicker from 'expo-image-picker'
 
 import { Alert } from 'react-native'
+import { locationStore } from '../stores/LocationStore'
 
 export default async function getPermissionAsync(permission) {
   const { status } = await Permissions.askAsync(permission)
@@ -29,7 +29,7 @@ export default async function getPermissionAsync(permission) {
 
 export async function getLocationAsync(onSend) {
   if (await getPermissionAsync(Permissions.LOCATION)) {
-    const location = await Location.getCurrentPositionAsync({})
+    const location = await locationStore.getCurrentLocationAsync();
     if (location) {
       onSend([{ location: location.coords }])
     }
@@ -37,7 +37,7 @@ export async function getLocationAsync(onSend) {
 }
 
 export async function pickImageAsync(onSend) {
-  if (await getPermissionAsync(Permissions.CAMERA_ROLL)) {
+  if (await getPermissionAsync(Permissions.MEDIA_LIBRARY)) {
     const result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: true,
       aspect: [4, 3],

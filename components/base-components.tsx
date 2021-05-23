@@ -16,6 +16,10 @@ function Button(props) {
     </RNEButton>;
 }
 
+function DisabledChatToolbar(props) {
+    return <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}><Text>You can not send message to this chat</Text></View>
+}
+
 function TextInput(props: TextInputProps) {
     return <RNEInput
         inputContainerStyle={{ borderWidth: 1, borderRadius: 5, borderColor: AppTheme.colors.themeColor, paddingLeft: 15 }}
@@ -51,4 +55,4 @@ function Divider(props) {
 }
 
 
-export { Button, Divider, Container, TextInput, CompatibleView }
+export { Button, Divider, Container, TextInput, CompatibleView, DisabledChatToolbar }

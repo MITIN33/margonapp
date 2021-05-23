@@ -4,7 +4,7 @@ export interface UserLoginRequest {
 }
 
 
-export interface UserModel {
+export interface IUser {
     userName: string,
     firstName: string,
     lastName: string,
