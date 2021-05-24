@@ -45,8 +45,8 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
 
         this.user = {
             _id: userstore.user.userId,
-            name: userstore.user.firstName,
-            avatar: userstore.user.profilePicUrl
+            name: userstore.user.displayName,
+            avatar: userstore.user.photoUrl
         }
 
         this.sentTypingMessageSignal = true;
@@ -64,6 +64,8 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
 
     componentWillUnmount() {
         this._isMounted = false
+        chatStore.saveChat(this.selectedDialog.dialogId, chatStore.dialogMessages)
+        chatStore.setDialogMessages([]);
         chatHubStore.isUserReadingChat(this.selectedDialog.otherUserId, false);
         dialogsStore.setUnMessageCountZero(this.selectedDialog.dialogId)
     }

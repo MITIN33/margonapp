@@ -6,12 +6,13 @@ export interface UserLoginRequest {
 
 export interface IUser {
     userName: string,
-    firstName: string,
-    lastName: string,
-    profilePicUrl: string,
-    phone: string,
-    email: string,
-    userId: string
+    displayName: string,
+    photoUrl: string,
+    userId: string,
+    phoneNumber: string,
+    settings: {
+        maxRangeInMeteres: number
+    }
 }
 
 export interface AuthResponse {

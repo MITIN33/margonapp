@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { ListItem, Avatar } from 'react-native-elements'
 import { FlatList, RefreshControl } from 'react-native';
 import { margonAPI } from '../api/margon-server-api';
+import { locationStore } from '../stores/LocationStore';
 
 class OnlineUsersScreen extends Component<any, any> {
 
@@ -18,7 +19,7 @@ class OnlineUsersScreen extends Component<any, any> {
     }
 
     renderItem = ({ item }) => (
-        <ListItem bottomDivider onPress={() => this.props.navigation.navigate('Chat', { name: item.name, otherUserId: item._id, photoUrl: item.avatar })}>
+        <ListItem bottomDivider onPress={() => this.onItemClick(item)}>
             <Avatar rounded source={{ uri: item.avatar }} />
             <ListItem.Content>
                 <ListItem.Title>{item.name}</ListItem.Title>
@@ -29,17 +30,34 @@ class OnlineUsersScreen extends Component<any, any> {
 
     onRefresh: () => void;
 
+    private onItemClick(item) {
+        this.props.navigation.navigate('Chat', {
+            name: item.name,
+            otherUserId: item._id,
+            photoUrl: item.avatar
+        })
+    }
+
 
     componentDidMount() {
         this.setState({ isLoading: true })
-        margonAPI.NearbyUsers()
-            .then((response) => {
-                if (response.data) {
-                    var users = response.data['items']
-                    this.setState({ userList: users })
+        locationStore.getCurrentLocationAsync()
+            .then((location) => {
+                if (location) {
+                    margonAPI.NearbyUsers(location.coords.longitude, location.coords.latitude)
+                        .then((response) => {
+                            if (response.data) {
+                                var users = response.data['items']
+                                this.setState({ userList: users })
+                            }
+                        })
+                        .finally(() => {
+                            this.setState({ isLoading: false })
+                        })
                 }
             })
-            .then(() => {
+            .catch((ex) => { console.error(ex.Messsage) })
+            .finally(() => {
                 this.setState({ isLoading: false })
             })
     }

@@ -2,6 +2,7 @@ import { Linking } from 'expo'
 import * as Location from 'expo-location'
 import * as Permissions from 'expo-permissions'
 import { Alert, Vibration } from 'react-native'
+import { firebaseApp } from '../api/firebase-config'
 import { margonAPI } from '../api/margon-server-api'
 
 class LocationStore {
@@ -41,8 +42,8 @@ class LocationStore {
     public async watchLocationAsync() {
         if (await this.getPermissionAsync(Permissions.LOCATION)) {
             Location.watchPositionAsync({ distanceInterval: 10 }, (location: Location.LocationObject) => {
-                console.log(JSON.stringify(location.coords))
-                margonAPI.sendLocation(location)
+                if (firebaseApp.auth().currentUser !== null)
+                    margonAPI.sendLocation(location)
             })
         }
     }

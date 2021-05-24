@@ -32,7 +32,7 @@ class AppNavigator extends Component<any, any> {
     }
 
     componentDidMount() {
-        userstore.init()
+        userstore.loadApp()
             .finally(() => this.setState({ isLoading: false }))
     }
 
@@ -40,8 +40,8 @@ class AppNavigator extends Component<any, any> {
         if (this.state.isLoading) {
             return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><ActivityIndicator /></View>
         }
-        const firstName = userstore.user?.firstName;
-        const photoUrl = userstore.user?.profilePicUrl;
+        const firstName = userstore.user?.displayName;
+        const photoUrl = userstore.user?.photoUrl;
 
         return (
             <NavigationContainer>

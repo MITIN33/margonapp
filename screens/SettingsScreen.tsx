@@ -1,25 +1,18 @@
-import { observer } from 'mobx-react';
 import React, { Component } from 'react';
-import { Text, View, Image, Alert, Keyboard, ImageBackground } from 'react-native';
-import { IMessage } from "react-native-gifted-chat";
-import { Input, Button } from 'react-native-elements';
-import { color } from 'react-native-elements/dist/helpers';
-import { margonServer } from '../api/axios-instance';
-import { Container, Divider } from '../components/base-components';
+import { Text, View, Alert } from 'react-native';
+import { Button } from 'react-native-elements';
 import { userstore } from '../stores/UserStore';
 import { Avatar, ListItem, Icon, Overlay } from 'react-native-elements';
 import { GestureResponderEvent } from 'react-native';
 import { Switch } from 'react-native-elements';
 import {
-    pickImageAsync,
     takePictureAsync,
+    uploadMediaToFirestore,
 } from '../components/media-utils';
 import { ScrollView } from 'react-native-gesture-handler';
 import { dialogsStore } from '../stores/DialogsStore';
 import { chatStore } from '../stores/ChatStore';
-import { authStore } from '../stores/AuthStore';
 
-@observer
 class SettingsScreen extends Component<any, any> {
 
     constructor(props) {
@@ -73,7 +66,7 @@ class SettingsScreen extends Component<any, any> {
     };
     OnHandleImageClick = () => {
         try {
-            const currentUserPic = userstore.user.profilePicUrl;
+            const currentUserPic = userstore.user.photoUrl;
             this.props.navigation.navigate('ProfileImage', currentUserPic);
         }
         catch (ex) {
@@ -111,18 +104,18 @@ class SettingsScreen extends Component<any, any> {
         this.setState({ visible: !visible });
     };
 
-    onImageUpload = (messages: IMessage[] = []) => {
-        console.log(messages);
+    onImageUpload = () => {
+        uploadMediaToFirestore();
     }
 
     render() {
         const { availibilityFlag, visible } = this.state;
         const currentUser = userstore.user;
-        const userFullName = currentUser.firstName + ' ' + (currentUser.lastName ? currentUser.lastName : '');
+        const userFullName = currentUser.displayName;
         return (
             <ScrollView>
                 <View style={{ flex: 1, justifyContent: 'center', marginTop: 20, marginBottom: 20, alignItems: 'center' }}>
-                    <Avatar onPress={this.OnHandleImageClick} size={85} source={{ uri: currentUser.profilePicUrl }} rounded >
+                    <Avatar onPress={this.OnHandleImageClick} size={85} source={{ uri: currentUser.photoUrl }} rounded >
                         <Avatar.Accessory onPress={this.OnHandleEdit} size={20} source={require('../assets/edit-icon.png')} />
                     </Avatar>
                     <Text style={{ marginTop: 10, fontSize: 24 }}>{userFullName}</Text>
@@ -138,7 +131,7 @@ class SettingsScreen extends Component<any, any> {
                         <Button
                             type='clear'
                             icon={<Icon name='image-outline' size={25} type='ionicon' style={{ marginRight: 10 }} />}
-                            onPress={() => pickImageAsync(this.onImageUpload)}
+                            onPress={this.onImageUpload}
                             title='Gallery'
                         />
                         <Button

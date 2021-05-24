@@ -45,7 +45,6 @@ class ChatStore {
         this.isLoadingMessages = value
     }
 
-    @action
     public addMessage(chatMessage: IMessage) {
         var newMessageList = GiftedChat.append(
             this.dialogMessages,
@@ -93,26 +92,28 @@ class ChatStore {
     public async loadChatMessagesForDialogId(dialog: IDialogs) {
         try {
 
-            this.setIsLoadingMessage(true);
-            this.getChat(dialog.dialogId)
-                .then((data) => {
-                    if (data !== null) {
-                        this.setDialogMessages(data);
-                        this.setIsLoadingMessage(false);
-                    }
-                    margonAPI.GetChatList(dialog.dialogId, null)
-                        .then((response) => {
-                            if (response.data) {
-                                this.setDialogMessages(this.convertToLocaLChatMessages(response.data['items']));
-                                this.chatContinuationToken = response.data['continuationToken'];
-                                this.saveChat(dialog.dialogId, this.dialogMessages);
-                            }
-                        })
-                });
+            if (dialog.dialogId) {
+                this.setIsLoadingMessage(true);
+                asyncStorage.getData(dialog.dialogId)
+                    .then((data) => {
+                        if (data !== null) {
+                            this.setDialogMessages(data);
+                            this.setIsLoadingMessage(false);
+                        }
+                        margonAPI.GetChatList(dialog.dialogId, null)
+                            .then((response) => {
+                                if (response.data) {
+                                    this.setDialogMessages(this.convertToLocaLChatMessages(response.data['items']));
+                                    this.chatContinuationToken = response.data['continuationToken'];
+                                    this.saveChat(dialog.dialogId, this.dialogMessages);
+                                }
+                            })
+                    }).finally(() => this.setIsLoadingMessage(false));
+            }
         } catch (error) {
-            throw error;
+            console.log(error)
+            // this.setIsLoadingMessage(false)
         }
-        this.setIsLoadingMessage(false);
     }
 
     public async loadEarlierChatMessagesForDialogId(dialog: IDialogs) {
@@ -147,14 +148,18 @@ class ChatStore {
         this.setIsUserTyping(false);
     }
 
-    private saveChat(dialogId: string, messages: IMessage[]) {
-        asyncStorage.saveData(dialogId, messages);
+    public saveChat(dialogId: string, messages: IMessage[]) {
+        if (dialogId)
+            asyncStorage.saveData(dialogId, messages);
     }
 
 
     private async getChat(dialogId) {
-        var data = await asyncStorage.getData(dialogId)
-        return data;
+        if (dialogId) {
+            var data = await asyncStorage.getData(dialogId)
+            return data;
+        }
+        return [];
     }
 
     private convertToLocaLChatMessages(margonChatMessages: IMargonChatMessage[]) {
@@ -189,8 +194,8 @@ class ChatStore {
         else {
             user = {
                 _id: userstore.user.userId,
-                name: userstore.user.firstName,
-                avatar: userstore.user.profilePicUrl
+                name: userstore.user.displayName,
+                avatar: userstore.user.photoUrl
             };
         }
         return user

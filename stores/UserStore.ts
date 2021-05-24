@@ -1,11 +1,10 @@
 import { action, makeObservable, observable } from 'mobx';
+import { firebaseApp } from '../api/firebase-config';
 import { margonAPI } from '../api/margon-server-api';
 import { asyncStorage } from '../models/async-storage';
 import { clientConstants } from '../models/constants';
-import { UserLoginRequest, IUser } from '../models/user-models';
+import { IUser } from '../models/user-models';
 import { authStore } from './AuthStore';
-import { chatStore } from './ChatStore';
-import { dialogsStore } from './DialogsStore';
 class UserStore {
 
     @observable
@@ -20,9 +19,7 @@ class UserStore {
     @observable
     public isFetchingNearbyUser: boolean;
 
-    //non-observable
-    public user: IUser = null;
-    public userLoginRequest: UserLoginRequest = null;
+    public user: IUser;
 
     constructor() {
         makeObservable(this);
@@ -32,6 +29,10 @@ class UserStore {
     @action
     public setIsUserLoading(value) {
         this.isUserloading = value;
+    }
+
+    public setUser(value) {
+        this.user = value;
     }
 
     @action
@@ -45,38 +46,70 @@ class UserStore {
         this.isUserReadingChatMap.set(userId, value);
     }
 
-    public async fetchUser() {
-        var response = await margonAPI.Me();
-        this.user = response.data
-        await this.saveUserInfo(this.user);
-    }
-
-
-    public init = async () => {
-        this.user = await asyncStorage.getData(clientConstants.USER_STORAGE_KEY);
-        authStore.setUserSignedIn(this.user !== null);
-    }
-
-    public setLoginData = async (authResponse) => {
-        await authStore.saveTokenInfo(authResponse)
-        await this.fetchUser();
-        authStore.setUserSignedIn(true);
-    }
-
-    public saveUserInfo = async (userResponse) => {
-        try {
-            await asyncStorage.saveData(clientConstants.USER_STORAGE_KEY, userResponse);
-        } catch (e) {
-            console.error('Failed to save the data to the storage');
+    public loadApp = async () => {
+        if (firebaseApp.auth().currentUser === null) {
+            authStore.setUserSignedIn(false)
+            console.log('no user found')
+            return;
         }
+
+        //get the user from cache and set sign in true
+        var cacheUser = await asyncStorage.getData(firebaseApp.auth().currentUser.uid);
+        this.setUser(cacheUser);
+        authStore.setUserSignedIn(true);
+
+        //pull latest info of user and update the object
+        margonAPI.getOrAddUser(this.getUserFirebaseApp())
+            .then((user) => {
+                this.setUser(user);
+                asyncStorage.saveData(firebaseApp.auth().currentUser.uid, user)
+            })
+            .catch(() => { })
     }
 
     public Logout = () => {
-        margonAPI.Logout().then(() => {
+        firebaseApp.auth().signOut().then(() => {
             asyncStorage.clearAllData(() => {
+                this.user = null;
                 authStore.setUserSignedIn(false);
             })
         })
+    }
+
+    public async validateCodeAndAddUser(code) {
+
+        try {
+            await authStore.confirmationResult.confirm(code);
+        }
+        catch (error) {
+            throw new Error('Wrong code entered, please try again');
+        }
+        console.log('Code validated ');
+        try {
+            var user = await margonAPI.getOrAddUser(this.getUserFirebaseApp())
+            asyncStorage.saveData(user.userId, user);
+            this.setUser(user)
+        } catch (error) {
+            throw new Error('Unable to sign you in at the momemt, please try later');
+        }
+
+        authStore.setUserSignedIn(true);
+    }
+
+
+    private getUserFirebaseApp() {
+        var firebaseUser = firebaseApp.auth().currentUser;
+        const user: IUser = {
+            displayName: firebaseUser.displayName,
+            photoUrl: firebaseUser.photoURL ?? clientConstants.DEFAULT_IMAGE_URL,
+            phoneNumber: firebaseUser.phoneNumber,
+            userId: firebaseUser.uid,
+            userName: firebaseUser.displayName,
+            settings: {
+                maxRangeInMeteres: 50000
+            }
+        }
+        return user;
     }
 }
 

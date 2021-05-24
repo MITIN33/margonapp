@@ -4,6 +4,8 @@ import * as ImagePicker from 'expo-image-picker'
 
 import { Alert } from 'react-native'
 import { locationStore } from '../stores/LocationStore'
+import storage from '@react-native-firebase/storage'
+import { utils } from '@react-native-firebase/app'
 
 export default async function getPermissionAsync(permission) {
   const { status } = await Permissions.askAsync(permission)
@@ -43,9 +45,26 @@ export async function pickImageAsync(onSend) {
       aspect: [4, 3],
     })
 
-    if (!result.cancelled) {
+    if (!result.cancelled && onSend) {
       onSend([{ image: result.uri }])
-      return result.uri
+    }
+    return result.uri
+  }
+}
+
+export async function uploadMediaToFirestore() {
+  if (await getPermissionAsync(Permissions.MEDIA_LIBRARY)) {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      allowsEditing: true,
+      aspect: [4, 3],
+    })
+
+    if (!result.cancelled) {
+      console.log(`Uri: ${result.uri}`)
+      //const pathToFile = `${ utils.FilePath.PICTURES_DIRECTORY } / name`;
+      storage().ref(`/ messages / ${name}`).putFile(result.uri).then((response) => {
+        console.log(response)
+      })
     }
   }
 }

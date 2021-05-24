@@ -5,9 +5,7 @@ import { StatusBar } from 'react-native';
 import { View, StyleSheet } from 'react-native';
 import { Avatar, ListItem, Text, Badge } from 'react-native-elements';
 import { ScrollView } from 'react-native-gesture-handler';
-import { margonServer } from '../api/axios-instance';
 import { margonAPI } from '../api/margon-server-api';
-import { chatStore } from '../stores/ChatStore';
 import { dialogsStore } from '../stores/DialogsStore';
 
 @observer

@@ -1,3 +1,4 @@
+import { IUser } from "../models/user-models";
 import { authStore } from "../stores/AuthStore";
 import { margonServer } from "./axios-instance";
 
@@ -9,21 +10,6 @@ class MargonAPI {
         return response;
     }
 
-    public async Login(userLoginRequest) {
-        var response = await margonServer.post('/auth/token', userLoginRequest);
-        return response;
-    }
-
-    public async SignUp(userSignRequest) {
-        var response = await margonServer.post('/auth/signup', userSignRequest);
-        return response;
-    }
-
-    public async Logout() {
-        var authtoken = await authStore.Token();
-        var response = await margonServer.get(`/auth/logout`, { headers: { 'Authorization': `Bearer ${authtoken}` } });
-        return response;
-    }
 
     public async ExitChat(dialogId) {
         var authtoken = await authStore.Token();
@@ -43,15 +29,22 @@ class MargonAPI {
         return response;
     }
 
-    public async updateUser(user) {
+
+    public async getOrAddUser(user: IUser) {
         var authtoken = await authStore.Token();
         var response = await margonServer.post(`/users`, user, { headers: { 'Authorization': `Bearer ${authtoken}` } });
-        return response;
+        return response.data;
     }
 
-    public async NearbyUsers() {
+    public async updateUser(user: IUser) {
         var authtoken = await authStore.Token();
-        var response = await margonServer.get('/users/nearby', { headers: { 'Authorization': `Bearer ${authtoken}` } });
+        var response = await margonServer.patch(`/users`, user, { headers: { 'Authorization': `Bearer ${authtoken}` } });
+        return response.data;
+    }
+
+    public async NearbyUsers(longitude, latitude) {
+        var authtoken = await authStore.Token();
+        var response = await margonServer.get('/users/nearby', { params: { lon: longitude, lat: latitude }, headers: { 'Authorization': `Bearer ${authtoken}` } });
         return response;
     }
 

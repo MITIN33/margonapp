@@ -3,6 +3,7 @@ import { authStore } from '../stores/AuthStore';
 import { chatStore } from '../stores/ChatStore';
 import { dialogsStore } from '../stores/DialogsStore';
 import { locationStore } from '../stores/LocationStore';
+import { userstore } from '../stores/UserStore';
 
 const chatHubUrl = "http://margonserver.azurewebsites.net/chatHub";
 
@@ -50,7 +51,7 @@ connection.on('IsTyping', (userId) => {
 class ChatHubStore {
 
   public connect = () => {
-    if (connection.state === signalR.HubConnectionState.Disconnected) {
+    if (connection.state === signalR.HubConnectionState.Disconnected && userstore.user !== null) {
       connection.start()
         .then(() => {
           console.log('SignalR connection started')

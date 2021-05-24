@@ -1,5 +1,6 @@
-// import auth from '@react-native-firebase/auth';
-// import app from '@react-native-firebase/app';
+import auth from '@react-native-firebase/auth';
+import app from '@react-native-firebase/app';
+import storage from '@react-native-firebase/storage';
 
 // const firebaseConfig = {
 //     apiKey: "AIzaSyC1nJ19aoo0yWsjL6MVJgXIDPeWSFyN9Ng",
@@ -12,6 +13,7 @@
 // };
 
 
-// const firebaseApp = app.apps.length ? app.app() : app.initializeApp(firebaseConfig);
-// const firebaseAuth = auth(firebaseApp);
-// export { firebaseApp, firebaseAuth };
+const firebaseApp = app.app();
+const firebaseAuth = auth();
+const firebaseStorage = storage();
+export { firebaseApp };
