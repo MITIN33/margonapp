@@ -2,6 +2,7 @@ import { action, makeAutoObservable, observable } from "mobx";
 import { margonAPI } from "../api/margon-server-api";
 import { asyncStorage } from "../models/async-storage";
 import { IChatUser, IDialogs, IMargonChatMessage, ScreenName } from "../models/chat-models";
+import { locationStore } from "./LocationStore";
 import { userstore } from "./UserStore";
 
 
@@ -14,7 +15,15 @@ class DialogsStore {
     public dialogs: IDialogs[] = [];
 
     @observable
+    public nearByUsers: IChatUser[] = [];
+
+    @observable
     public isDialogsLoading = true;
+
+    @observable
+    public isLoading = false;
+
+    private savingData = false;
 
     constructor() {
         makeAutoObservable(this)
@@ -25,10 +34,19 @@ class DialogsStore {
         this.dialogs = value;
     }
 
-
     @action
     public setIsDialogLoading(value) {
         this.isDialogsLoading = value;
+    }
+
+    @action
+    public setIsLoading(value) {
+        this.isLoading = value;
+    }
+
+    @action
+    public setNearByUser(value) {
+        this.nearByUsers = value;
     }
 
     @action
@@ -87,7 +105,22 @@ class DialogsStore {
         })
     };
 
-
+    public loadNearByUsers() {
+        this.setIsLoading(true);
+        locationStore.getCurrentLocationAsync()
+            .then((location => {
+                margonAPI.NearbyUsers(location.coords.longitude, location.coords.latitude)
+                    .then((response) => {
+                        if (response.data) {
+                            var users = response.data['items']
+                            this.setNearByUser(users)
+                        }
+                    })
+                    .finally(() => {
+                        this.setIsLoading(false)
+                    })
+            }))
+    }
 
     public loadDialogs() {
         this.setIsDialogLoading(true);
@@ -137,10 +170,14 @@ class DialogsStore {
         return newDialog;
     }
 
-    private saveDialogData(dialogs: IDialogs[]) {
-        var list = dialogs.slice();
-        list.map(x => x.isUserOnline = false);
-        asyncStorage.saveData(this.DIALOG_KEY, list)
+    private async saveDialogData(dialogs: IDialogs[]) {
+        if (!this.savingData) {
+            this.savingData = true;
+            var list = dialogs.slice();
+            list.map(x => x.isUserOnline = false);
+            await asyncStorage.saveData(this.DIALOG_KEY, list)
+            this.savingData = false;
+        }
     }
 }
 

@@ -7,6 +7,7 @@ import { Avatar, ListItem, Text, Badge } from 'react-native-elements';
 import { ScrollView } from 'react-native-gesture-handler';
 import { margonAPI } from '../api/margon-server-api';
 import { dialogsStore } from '../stores/DialogsStore';
+import { Colors } from '../theme/AppTheme';
 
 @observer
 class ChatHistoryScreen extends Component<any, any> {
@@ -16,8 +17,8 @@ class ChatHistoryScreen extends Component<any, any> {
 
     constructor(props) {
         super(props);
-        if (Platform.OS !== 'ios')
-            StatusBar.setBackgroundColor('#71afe5');
+        // if (Platform.OS !== 'ios')
+        //     StatusBar.setBackgroundColor('#71afe5');
         if (Platform.OS !== 'web')
             LogBox.ignoreLogs(['Setting a timer']);
         this.state = {
@@ -66,6 +67,7 @@ class ChatHistoryScreen extends Component<any, any> {
                         onRefresh={this.onRefresh}
                     />}
             >
+                <StatusBar backgroundColor={Colors.primary} />
                 <View>
                     {
                         dialogsStore.dialogs.slice().sort(this.timeBasedsort).map((dialog, i) => (

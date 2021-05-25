@@ -18,6 +18,8 @@ import { authStore } from "../stores/AuthStore";
 import { Button } from 'react-native-elements';
 import ProfileImageScreen from "../screens/ProfileImageScreen";
 import { locationStore } from "../stores/LocationStore";
+import ProfileScreen from "../screens/ProfileScreen";
+import { firebaseApp } from "../api/firebase-config";
 
 const Stack = createStackNavigator();
 
@@ -32,8 +34,11 @@ class AppNavigator extends Component<any, any> {
     }
 
     componentDidMount() {
-        userstore.loadApp()
-            .finally(() => this.setState({ isLoading: false }))
+        this.setState({ isLoading: true })
+        firebaseApp.auth().onAuthStateChanged((user) => {
+            userstore.loadUser(user)
+                .finally(() => this.setState({ isLoading: false }));
+        });
     }
 
     render() {
@@ -89,7 +94,7 @@ class AppNavigator extends Component<any, any> {
                                 <Stack.Screen name="GetStarted" component={GetStartedScreen} />
                                 <Stack.Screen name="Login" component={LoginScreen} />
                                 <Stack.Screen name="Verification" component={VerificationScreen} />
-                                <Stack.Screen name="SignUp" component={SignupScreen} />
+                                <Stack.Screen name="Profile" component={ProfileScreen} />
                             </>
                         )}
                 </Stack.Navigator>

@@ -20,13 +20,15 @@ class AuthStore {
 
     public async Token() {
         try {
-            var token = await firebaseApp.auth().currentUser.getIdToken();
-            return token;
+            if (firebaseApp.auth().currentUser !== null) {
+                var token = await firebaseApp.auth().currentUser.getIdToken();
+                return token;
+            }
         } catch (error) {
             console.error(error)
             this.setUserSignedIn(false);
-            return '';
         }
+        return '';
     }
 }
 

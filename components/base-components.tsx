@@ -2,18 +2,12 @@ import * as React from 'react';
 import { TextInputProps } from 'react-native';
 import { KeyboardAvoidingView, Platform, Text, View } from 'react-native';
 import { Button as RNEButton, Input as RNEInput } from 'react-native-elements';
-import AppTheme from '../theme/AppTheme';
+import AppTheme, { Colors } from '../theme/AppTheme';
 
 
 function Container(props) {
     const alignItems = props.center ? "center" : "baseline";
     return <View style={{ flex: 1, justifyContent: 'center', alignItems: alignItems, padding: 10 }} {...props}>{props.children}</View>
-}
-
-function Button(props) {
-    return <RNEButton containerStyle={[{ height: 40, justifyContent: "center", width: "100%", borderRadius: 5, margin: 20 }, props.style]} {...props}>
-        {props.title}
-    </RNEButton>;
 }
 
 function DisabledChatToolbar(props) {
@@ -22,11 +16,23 @@ function DisabledChatToolbar(props) {
 
 function TextInput(props: TextInputProps) {
     return <RNEInput
-        inputContainerStyle={{ borderWidth: 1, borderRadius: 5, borderColor: AppTheme.colors.themeColor, paddingLeft: 15 }}
+        inputContainerStyle={{ borderWidth: 1, borderRadius: 5, paddingLeft: 15 }}
         inputStyle={{ marginTop: 0 }}
         returnKeyLabel='Done'
         returnKeyType='done'
         {...props} />
+}
+
+function Heading({ text }) {
+    return <Text style={{ color: Colors.primary, fontSize: 30, fontWeight: 'bold', marginBottom: 30, marginTop: 30 }}>
+        {text}
+    </Text>
+}
+
+function Title({ text }) {
+    return <Text style={{ color: Colors.primary, marginBottom: 5, alignSelf: 'flex-start', paddingLeft: 10, marginTop: 30 }}>
+        {text}
+    </Text>
 }
 
 function CompatibleView(props) {
@@ -55,4 +61,4 @@ function Divider(props) {
 }
 
 
-export { Button, Divider, Container, TextInput, CompatibleView, DisabledChatToolbar }
+export { Divider, Container, TextInput, Heading, Title, CompatibleView, DisabledChatToolbar }

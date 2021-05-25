@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, View, Alert } from 'react-native';
+import { Text, View, Alert, ActivityIndicator, RefreshControl } from 'react-native';
 import { Button } from 'react-native-elements';
 import { userstore } from '../stores/UserStore';
 import { Avatar, ListItem, Icon, Overlay } from 'react-native-elements';
@@ -7,12 +7,16 @@ import { GestureResponderEvent } from 'react-native';
 import { Switch } from 'react-native-elements';
 import {
     takePictureAsync,
-    uploadMediaToFirestore,
+    pickImageAsync,
 } from '../components/media-utils';
 import { ScrollView } from 'react-native-gesture-handler';
 import { dialogsStore } from '../stores/DialogsStore';
 import { chatStore } from '../stores/ChatStore';
+import { firebaseApp } from '../api/firebase-config';
+import { margonAPI } from '../api/margon-server-api';
+import { observer } from 'mobx-react';
 
+@observer
 class SettingsScreen extends Component<any, any> {
 
     constructor(props) {
@@ -46,7 +50,7 @@ class SettingsScreen extends Component<any, any> {
             }
         ];
         this.state = {
-            isLoading: false,
+            loading: false,
             list: list,
             list2: list2,
             availibilityFlag: true,
@@ -105,20 +109,38 @@ class SettingsScreen extends Component<any, any> {
     };
 
     onImageUpload = () => {
-        uploadMediaToFirestore();
+
+        pickImageAsync(() => { })
+            .then((imageUri) => {
+                console.log(imageUri)
+            })
+
+        // pickImageAsync(async (result) => {
+        //     var imageUri = result.uri
+        //     this.toggleOverlay();
+        //     this.setState({ loading: true })
+        //     if (imageUri !== null) {
+        //         var path = `profile-pics/${userstore.user.userId}.jpeg`;
+        //         const ref = firebaseApp.storage().ref(path);
+        //         await ref.putFile(imageUri)
+        //         var url = await ref.getDownloadURL();
+        //         var user = await margonAPI.updateUser({ photoUrl: url })
+        //         userstore.setUser(user);
+        //         this.setState({ loading: false })
+        //     }
+        // })
     }
 
     render() {
         const { availibilityFlag, visible } = this.state;
-        const currentUser = userstore.user;
-        const userFullName = currentUser.displayName;
         return (
-            <ScrollView>
+            <ScrollView
+                refreshControl={<RefreshControl refreshing={this.state.loading} />}>
                 <View style={{ flex: 1, justifyContent: 'center', marginTop: 20, marginBottom: 20, alignItems: 'center' }}>
-                    <Avatar onPress={this.OnHandleImageClick} size={85} source={{ uri: currentUser.photoUrl }} rounded >
+                    <Avatar renderPlaceholderContent={<ActivityIndicator />} onPress={this.OnHandleImageClick} size={85} source={{ uri: userstore.user?.photoUrl }} rounded >
                         <Avatar.Accessory onPress={this.OnHandleEdit} size={20} source={require('../assets/edit-icon.png')} />
                     </Avatar>
-                    <Text style={{ marginTop: 10, fontSize: 24 }}>{userFullName}</Text>
+                    <Text style={{ marginTop: 10, fontSize: 24 }}>{userstore.user.displayName}</Text>
                 </View>
                 <Overlay isVisible={visible} onBackdropPress={this.toggleOverlay}>
                     <Text style={{ marginLeft: 5, fontWeight: 'bold' }}>Upload Profile Picture</Text>

@@ -1,5 +1,6 @@
 import { TextInput, StyleSheet, View } from "react-native";
 import React, { Component } from "react";
+import { Colors } from "../theme/AppTheme";
 
 export interface OTPProps {
     count: number;
@@ -66,6 +67,7 @@ const style = StyleSheet.create({
         margin: 5,
         borderWidth: 1,
         borderRadius: 4,
-        textAlign: 'center'
+        textAlign: 'center',
+        borderColor: Colors.primary
     }
 });

@@ -1,11 +1,12 @@
 import { Linking } from 'expo'
 import * as Permissions from 'expo-permissions'
-import * as ImagePicker from 'expo-image-picker'
 
 import { Alert } from 'react-native'
 import { locationStore } from '../stores/LocationStore'
 import storage from '@react-native-firebase/storage'
-import { utils } from '@react-native-firebase/app'
+import { margonAPI } from '../api/margon-server-api'
+// import * as ImagePicker from 'react-native-image-picker'
+import * as ImagePicker from 'expo-image-picker'
 
 export default async function getPermissionAsync(permission) {
   const { status } = await Permissions.askAsync(permission)
@@ -39,7 +40,7 @@ export async function getLocationAsync(onSend) {
 }
 
 export async function pickImageAsync(onSend) {
-  if (await getPermissionAsync(Permissions.MEDIA_LIBRARY)) {
+  if (await getPermissionAsync(Permissions.CAMERA_ROLL)) {
     const result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: true,
       aspect: [4, 3],
@@ -52,24 +53,17 @@ export async function pickImageAsync(onSend) {
   }
 }
 
-export async function uploadMediaToFirestore() {
-  if (await getPermissionAsync(Permissions.MEDIA_LIBRARY)) {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      allowsEditing: true,
-      aspect: [4, 3],
-    })
+// export async function pickImageAsync(callback) {
+//   if (await getPermissionAsync(Permissions.MEDIA_LIBRARY)) {
+//     ImagePicker.launchImageLibrary({
+//       maxHeight: 150,
+//       mediaType: 'photo',
+//       maxWidth: 150
+//     }, callback);
+//   }
+// }
 
-    if (!result.cancelled) {
-      console.log(`Uri: ${result.uri}`)
-      //const pathToFile = `${ utils.FilePath.PICTURES_DIRECTORY } / name`;
-      storage().ref(`/ messages / ${name}`).putFile(result.uri).then((response) => {
-        console.log(response)
-      })
-    }
-  }
-}
-
-export async function takePictureAsync(onSend) {
+export async function takePictureAsync(callback) {
   if (await getPermissionAsync(Permissions.CAMERA)) {
     const result = await ImagePicker.launchCameraAsync({
       allowsEditing: true,
@@ -77,7 +71,7 @@ export async function takePictureAsync(onSend) {
     })
 
     if (!result.cancelled) {
-      onSend([{ image: result.uri }])
+      callback([{ image: result.uri }])
       return result.uri
     }
   }

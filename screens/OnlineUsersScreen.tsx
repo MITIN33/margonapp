@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
-import { ListItem, Avatar } from 'react-native-elements'
-import { FlatList, RefreshControl } from 'react-native';
-import { margonAPI } from '../api/margon-server-api';
-import { locationStore } from '../stores/LocationStore';
+import { ListItem, Avatar, Card, Image } from 'react-native-elements'
+import { FlatList, RefreshControl, Text, View } from 'react-native';
+import { dialogsStore } from '../stores/DialogsStore';
+import { observer } from 'mobx-react';
 
+@observer
 class OnlineUsersScreen extends Component<any, any> {
 
 
@@ -12,19 +13,15 @@ class OnlineUsersScreen extends Component<any, any> {
      */
     constructor(props) {
         super(props)
-        this.state = {
-            isLoading: true,
-            userList: []
-        }
     }
 
     renderItem = ({ item }) => (
-        <ListItem bottomDivider onPress={() => this.onItemClick(item)}>
-            <Avatar rounded source={{ uri: item.avatar }} />
-            <ListItem.Content>
-                <ListItem.Title>{item.name}</ListItem.Title>
-            </ListItem.Content>
-        </ListItem>
+        <Card>
+            <View>
+                <Image onPress={() => this.onItemClick(item)} resizeMode='contain' style={{ width: 100, height: 100 }} source={{ uri: item.avatar }} />
+                <Text>{item.name}</Text>
+            </View>
+        </Card>
     )
 
 
@@ -40,38 +37,21 @@ class OnlineUsersScreen extends Component<any, any> {
 
 
     componentDidMount() {
-        this.setState({ isLoading: true })
-        locationStore.getCurrentLocationAsync()
-            .then((location) => {
-                if (location) {
-                    margonAPI.NearbyUsers(location.coords.longitude, location.coords.latitude)
-                        .then((response) => {
-                            if (response.data) {
-                                var users = response.data['items']
-                                this.setState({ userList: users })
-                            }
-                        })
-                        .finally(() => {
-                            this.setState({ isLoading: false })
-                        })
-                }
-            })
-            .catch((ex) => { console.error(ex.Messsage) })
-            .finally(() => {
-                this.setState({ isLoading: false })
-            })
+        dialogsStore.loadNearByUsers();
     }
 
     render() {
         return (
             <FlatList
+                scrollEnabled
+                numColumns={2}
                 refreshControl={
                     <RefreshControl
-                        refreshing={this.state.isLoading}
-                        onRefresh={this.onRefresh}
+                        refreshing={false}
+                        onRefresh={() => dialogsStore.loadNearByUsers()}
                     />}
                 keyExtractor={(item) => item._id}
-                data={this.state.userList}
+                data={dialogsStore.nearByUsers}
                 renderItem={this.renderItem}
             />
         )

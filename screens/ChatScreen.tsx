@@ -6,7 +6,7 @@ import { StatusBar } from "react-native";
 import { MaterialIcons } from '@expo/vector-icons'
 import AccessoryBar from "../components/accessory-bar";
 import CustomView from "../components/custom-view";
-import AppTheme from "../theme/AppTheme";
+import AppTheme, { Colors } from "../theme/AppTheme";
 import { userstore } from "../stores/UserStore";
 import { IDialogs, IMargonChatMessage } from "../models/chat-models";
 import { chatStore } from "../stores/ChatStore";
@@ -38,8 +38,8 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
 
     constructor(props) {
         super(props);
-        if (Platform.OS !== 'ios')
-            StatusBar.setBackgroundColor(AppTheme.colors.themeColor);
+        // if (Platform.OS !== 'ios')
+        //     StatusBar.setBackgroundColor(AppTheme.colors.themeColor);
 
         this.selectedDialog = this.props.route.params;
 
@@ -249,6 +249,8 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
                 style={{ flex: 1 }}
                 accessibilityLabel='main'
             >
+                <StatusBar backgroundColor={Colors.primary} />
+
                 <GiftedChat
                     messages={chatStore.dialogMessages.slice()}
                     onSend={this.onSend}
