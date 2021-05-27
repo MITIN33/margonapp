@@ -51,8 +51,8 @@ class DialogsStore {
 
     @action
     public setUserIsReading(userId, isUserReading) {
-        this.dialogs.map(x => {
-            if (userId == x.otherUserId) {
+        this.dialogs.forEach(x => {
+            if (x.otherUserId === userId) {
                 x.isUserReadingChat = isUserReading;
             }
         });
@@ -60,8 +60,8 @@ class DialogsStore {
 
     @action
     public setUserIsTyping(userId, IsTyping) {
-        this.dialogs.map(x => {
-            if (x.otherUserId == userId) {
+        this.dialogs.forEach(x => {
+            if (x.otherUserId === userId) {
                 x.isUserTyping = IsTyping;
             }
         });
@@ -89,7 +89,7 @@ class DialogsStore {
 
     @action
     public setUnMessageCountZero(dialogId: string) {
-        this.dialogs.map(x => {
+        this.dialogs.forEach(x => {
             if (x.dialogId == dialogId) {
                 x.unreadMessageCount = 0
             }
@@ -98,7 +98,7 @@ class DialogsStore {
 
     @action
     public markUserOnlineForDialog(userId: string, isUserOnline: boolean) {
-        this.dialogs.map(x => {
+        this.dialogs.forEach(x => {
             if (x.otherUserId == userId) {
                 x.isUserOnline = isUserOnline
             }
@@ -174,7 +174,7 @@ class DialogsStore {
         if (!this.savingData) {
             this.savingData = true;
             var list = dialogs.slice();
-            list.map(x => x.isUserOnline = false);
+            list.forEach(x => x.isUserOnline = false);
             await asyncStorage.saveData(this.DIALOG_KEY, list)
             this.savingData = false;
         }

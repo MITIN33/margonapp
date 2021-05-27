@@ -21,8 +21,13 @@ class GetStartedScreen extends Component<any, any> {
                 <StatusBar backgroundColor={Colors.primary} />
                 {/* <Image source={require('../assets/chat-icon.png')} style={{ width: 100, height: 100, marginBottom: 20 }} /> */}
 
-                <Text style={{fontSize: 40, color: 'white', fontFamily: 'lucida grande'}}>margon</Text>
-                <Button containerStyle={{position: 'absolute', bottom: 50}} buttonStyle={{ height: 50, borderRadius: 10, backgroundColor: Colors.lightGrey1 }} titleStyle={{ color: Colors.primary }} title="Get Started" onPress={() => this.props.navigation.navigate('Login')} />
+                <Text style={{ fontSize: 40, color: 'white', fontFamily: 'lucida grande' }}>margon</Text>
+                <Button
+                    containerStyle={{ position: 'absolute', bottom: 50 }}
+                    buttonStyle={{ height: 50, borderRadius: 10, backgroundColor: Colors.lightGrey1 }}
+                    titleStyle={{ color: Colors.primary }}
+                    title="Get Started"
+                    onPress={() => this.props.navigation.navigate('Login')} />
             </View>
         );
     }

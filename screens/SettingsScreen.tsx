@@ -109,26 +109,20 @@ class SettingsScreen extends Component<any, any> {
     };
 
     onImageUpload = () => {
-
-        pickImageAsync(() => { })
-            .then((imageUri) => {
-                console.log(imageUri)
-            })
-
-        // pickImageAsync(async (result) => {
-        //     var imageUri = result.uri
-        //     this.toggleOverlay();
-        //     this.setState({ loading: true })
-        //     if (imageUri !== null) {
-        //         var path = `profile-pics/${userstore.user.userId}.jpeg`;
-        //         const ref = firebaseApp.storage().ref(path);
-        //         await ref.putFile(imageUri)
-        //         var url = await ref.getDownloadURL();
-        //         var user = await margonAPI.updateUser({ photoUrl: url })
-        //         userstore.setUser(user);
-        //         this.setState({ loading: false })
-        //     }
-        // })
+        pickImageAsync(async (result) => {
+            var imageUri = result.uri
+            this.toggleOverlay();
+            this.setState({ loading: true })
+            if (imageUri !== null) {
+                var path = `profile-pics/${userstore.user.userId}.jpeg`;
+                const ref = firebaseApp.storage().ref(path);
+                await ref.putFile(imageUri)
+                var url = await ref.getDownloadURL();
+                var user = await margonAPI.updateUser({ photoUrl: url })
+                userstore.setUser(user);
+                this.setState({ loading: false })
+            }
+        })
     }
 
     render() {
@@ -140,7 +134,7 @@ class SettingsScreen extends Component<any, any> {
                     <Avatar renderPlaceholderContent={<ActivityIndicator />} onPress={this.OnHandleImageClick} size={85} source={{ uri: userstore.user?.photoUrl }} rounded >
                         <Avatar.Accessory onPress={this.OnHandleEdit} size={20} source={require('../assets/edit-icon.png')} />
                     </Avatar>
-                    <Text style={{ marginTop: 10, fontSize: 24 }}>{userstore.user.displayName}</Text>
+                    <Text style={{ marginTop: 10, fontSize: 24 }}>{userstore.user?.displayName}</Text>
                 </View>
                 <Overlay isVisible={visible} onBackdropPress={this.toggleOverlay}>
                     <Text style={{ marginLeft: 5, fontWeight: 'bold' }}>Upload Profile Picture</Text>

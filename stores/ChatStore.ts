@@ -68,7 +68,7 @@ class ChatStore {
         this.setDialogMessages(newList);
     }
 
-    public markAllMessageRead(userId, isChatRead) {
+    public markMessageRead(userId, isChatRead) {
         var newList = []
         dialogsStore.setUserIsReading(userId, isChatRead);
         if (isChatRead) {

@@ -3,10 +3,7 @@ import * as Permissions from 'expo-permissions'
 
 import { Alert } from 'react-native'
 import { locationStore } from '../stores/LocationStore'
-import storage from '@react-native-firebase/storage'
-import { margonAPI } from '../api/margon-server-api'
-// import * as ImagePicker from 'react-native-image-picker'
-import * as ImagePicker from 'expo-image-picker'
+import * as ImagePicker from 'react-native-image-picker'
 
 export default async function getPermissionAsync(permission) {
   const { status } = await Permissions.askAsync(permission)
@@ -39,40 +36,36 @@ export async function getLocationAsync(onSend) {
   }
 }
 
-export async function pickImageAsync(onSend) {
-  if (await getPermissionAsync(Permissions.CAMERA_ROLL)) {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      allowsEditing: true,
-      aspect: [4, 3],
-    })
+// export async function pickImageAsync(onSend) {
+//   if (await getPermissionAsync(Permissions.CAMERA_ROLL)) {
+//     const result = await ImagePicker.launchImageLibrary({
+//       allowsEditing: true,
+//       aspect: [4, 3],
+//     })
 
-    if (!result.cancelled && onSend) {
-      onSend([{ image: result.uri }])
-    }
-    return result.uri
-  }
-}
-
-// export async function pickImageAsync(callback) {
-//   if (await getPermissionAsync(Permissions.MEDIA_LIBRARY)) {
-//     ImagePicker.launchImageLibrary({
-//       maxHeight: 150,
-//       mediaType: 'photo',
-//       maxWidth: 150
-//     }, callback);
+//     if (!result.cancelled && onSend) {
+//       onSend([{ image: result.uri }])
+//     }
+//     return result.uri
 //   }
 // }
 
+export async function pickImageAsync(callback) {
+  if (await getPermissionAsync(Permissions.MEDIA_LIBRARY)) {
+    ImagePicker.launchImageLibrary({
+      maxHeight: 150,
+      mediaType: 'photo',
+      maxWidth: 150
+    }, callback);
+  }
+}
+
 export async function takePictureAsync(callback) {
   if (await getPermissionAsync(Permissions.CAMERA)) {
-    const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      aspect: [4, 3],
-    })
-
-    if (!result.cancelled) {
-      callback([{ image: result.uri }])
-      return result.uri
-    }
+    ImagePicker.launchCamera({
+      mediaType: 'photo',
+      maxHeight: 150,
+      maxWidth: 200
+    }, callback);
   }
 }

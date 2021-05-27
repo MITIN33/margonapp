@@ -1,4 +1,5 @@
 import * as signalR from '@microsoft/signalr';
+import { ToastAndroid } from 'react-native';
 import { authStore } from '../stores/AuthStore';
 import { chatStore } from '../stores/ChatStore';
 import { dialogsStore } from '../stores/DialogsStore';
@@ -8,7 +9,7 @@ import { userstore } from '../stores/UserStore';
 const chatHubUrl = "http://margonserver.azurewebsites.net/chatHub";
 
 const connection: signalR.HubConnection = new signalR.HubConnectionBuilder()
-  .withUrl(chatHubUrl, { accessTokenFactory: () => authStore.Token() })
+  .withUrl(chatHubUrl, { accessTokenFactory: () => authStore.Token() , transport: signalR.HttpTransportType.WebSockets})
   .withAutomaticReconnect()
   .configureLogging(signalR.LogLevel.Error)
   .build();
@@ -40,11 +41,12 @@ connection.on('IsOnline', (userId, isOnline) => {
 })
 
 connection.on('IsReadingChat', (userId, isReadingChat) => {
-  chatStore.markAllMessageRead(userId, isReadingChat)
+  chatStore.markMessageRead(userId, isReadingChat)
 })
 
 connection.on('IsTyping', (userId) => {
-  dialogsStore.setUserIsTyping(userId, true);
+  chatStore.markMessageRead(userId, true)
+  dialogsStore.setUserIsTyping(userId, true)
 })
 
 
@@ -65,8 +67,12 @@ class ChatHubStore {
   }
 
   public async sendMessage(message) {
-    var response = await connection.invoke("SendMessage", message)
-    return response;
+    if (connection.state === signalR.HubConnectionState.Connected) {
+      var response = await connection.invoke("SendMessage", message)
+      return response;
+    } else {
+      this.connect();
+    }
   }
 
   public async sendTypingMessage(toUserId) {
@@ -75,7 +81,7 @@ class ChatHubStore {
 
   public isUserReadingChat(thisUserId, isReading) {
     connection.invoke("IsReadingChat", thisUserId, isReading)
-      .catch(() => console.log('Error in sending message'))
+      .catch(() => console.log('Connection Error'))
   }
 
 }
