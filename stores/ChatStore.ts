@@ -116,6 +116,12 @@ class ChatStore {
         }
     }
 
+    public unloadChatData(){
+        this.saveChat(this.selectedDialog.dialogId, this.dialogMessages)
+        this.setDialogMessages([])
+        this.selectedDialog = null
+    }
+
     public async loadEarlierChatMessagesForDialogId(dialog: IDialogs) {
 
         if (this.chatContinuationToken) {

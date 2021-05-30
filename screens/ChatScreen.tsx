@@ -38,14 +38,14 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
 
     constructor(props) {
         super(props);
-        // if (Platform.OS !== 'ios')
-        //     StatusBar.setBackgroundColor(AppTheme.colors.themeColor);
-
+        
         this.user = {
             _id: userstore.user.userId,
             name: userstore.user.displayName,
             avatar: userstore.user.photoUrl
         }
+
+        this.selectedDialog = this.props.route.params;
 
         this.sentTypingMessageSignal = true;
         this.state = {
@@ -59,18 +59,9 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
         }
     }
 
-
-    componentWillUnmount() {
-        this._isMounted = false
-        chatStore.selectedDialog = null;
-        chatStore.saveChat(this.selectedDialog.dialogId, chatStore.dialogMessages)
-        chatStore.setDialogMessages([]);
-        dialogsStore.setUnMessageCountZero(this.selectedDialog.dialogId)
-    }
-
     componentDidMount() {
         this._isMounted = true
-        this.selectedDialog = chatStore.selectedDialog;
+        chatStore.selectedDialog = this.selectedDialog;
         this.props.navigation.setOptions({ headerTitle: this.selectedDialog.name });
         chatHubStore.isUserReadingChat(this.selectedDialog.otherUserId, this.selectedDialog.dialogId);
         chatStore.loadChatMessagesForDialogId(this.selectedDialog)
@@ -86,6 +77,15 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
             })
             .catch((e) => console.log(e.message));
 
+    }
+
+
+    
+
+    componentWillUnmount() {
+        this._isMounted = false
+        dialogsStore.setUnMessageCountZero(this.selectedDialog.dialogId)
+        chatStore.unloadChatData();
     }
 
     onInputTextChange = (text: string) => {

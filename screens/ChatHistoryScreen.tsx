@@ -75,8 +75,7 @@ class ChatHistoryScreen extends Component<any, any> {
                             <ListItem key={i} bottomDivider
                                 onLongPress={() => this.onLongPressAction(dialog)}
                                 onPress={() => {
-                                    chatStore.selectedDialog = dialog
-                                    this.props.navigation.navigate('Chat')
+                                    this.props.navigation.navigate('Chat', dialog)
                                 }}>
                                 <Avatar source={{ uri: dialog.photoUrl }} rounded onPress={() => {
                                     this.props.navigation.navigate('ProfileImage', dialog.photoUrl)

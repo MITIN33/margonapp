@@ -96,7 +96,7 @@ class DialogsStore {
         })
     };
 
-    public loadNearByUsers() {
+    public loadNearByUsers = () => {
         this.setIsLoading(true);
         locationStore.getCurrentLocationAsync()
             .then((location => {

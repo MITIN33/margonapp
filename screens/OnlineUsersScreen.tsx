@@ -51,7 +51,7 @@ class OnlineUsersScreen extends Component<any, any> {
                 refreshControl={
                     <RefreshControl
                         refreshing={false}
-                        onRefresh={() => dialogsStore.loadNearByUsers()}
+                        onRefresh={dialogsStore.loadNearByUsers}
                     />}
                 keyExtractor={(item) => item._id}
                 data={dialogsStore.nearByUsers}
@@ -62,13 +62,3 @@ class OnlineUsersScreen extends Component<any, any> {
 }
 
 export default OnlineUsersScreen;
-
-
-const styles = StyleSheet.create({
-    buttonContainer: {
-        flex: 1,
-    },
-    cardStyle: {
-
-    }
-});

@@ -34,7 +34,6 @@ connection.on("ReceiveMessage", (userId, message) => {
   chatStore.onMessageReceive(message);
   dialogsStore.addMessageToDialog(message);
   if (chatStore.selectedDialog !== null) {
-    console.log('select dialog found, sending receipt back: ' + message.message);
     connection.invoke("ChatReadByUser", userId, message.dialogId).catch((e) => console.log(e))
   }
 });
