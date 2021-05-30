@@ -12,14 +12,6 @@ export interface IDialogs {
     isUserTyping?: boolean,
     isArchived?: boolean
 }
-export interface IChatRequest {
-    message: string,
-    dialogId: string,
-    dateSent: number,
-    attachments: IAttachments,
-}
-
-
 export interface IAttachments {
     id: string,
     url: string,

@@ -21,6 +21,8 @@ class ChatStore {
     @observable
     public isLoadingMessages: boolean;
 
+    public selectedDialog: IDialogs;
+
     //private memebers
     private chatContinuationToken: string
     /**
@@ -61,17 +63,15 @@ class ChatStore {
             newList.push({
                 ...x,
                 pending: false,
-                received: dialogForUser.isUserReadingChat ? true : x.received,
                 sent: true
             })
         })
         this.setDialogMessages(newList);
     }
 
-    public markMessageRead(userId, isChatRead) {
-        var newList = []
-        dialogsStore.setUserIsReading(userId, isChatRead);
-        if (isChatRead) {
+    public markMessageRead(userId, dialogId) {
+        if (this.selectedDialog && this.selectedDialog.dialogId === dialogId) {
+            var newList = []
             this.dialogMessages.map(x => {
                 newList.push({
                     ...x,
@@ -151,15 +151,6 @@ class ChatStore {
     public saveChat(dialogId: string, messages: IMessage[]) {
         if (dialogId)
             asyncStorage.saveData(dialogId, messages);
-    }
-
-
-    private async getChat(dialogId) {
-        if (dialogId) {
-            var data = await asyncStorage.getData(dialogId)
-            return data;
-        }
-        return [];
     }
 
     private convertToLocaLChatMessages(margonChatMessages: IMargonChatMessage[]) {

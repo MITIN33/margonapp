@@ -6,6 +6,7 @@ import { View, StyleSheet } from 'react-native';
 import { Avatar, ListItem, Text, Badge } from 'react-native-elements';
 import { ScrollView } from 'react-native-gesture-handler';
 import { margonAPI } from '../api/margon-server-api';
+import { chatStore } from '../stores/ChatStore';
 import { dialogsStore } from '../stores/DialogsStore';
 import { Colors } from '../theme/AppTheme';
 
@@ -74,7 +75,8 @@ class ChatHistoryScreen extends Component<any, any> {
                             <ListItem key={i} bottomDivider
                                 onLongPress={() => this.onLongPressAction(dialog)}
                                 onPress={() => {
-                                    this.props.navigation.navigate('Chat', dialog)
+                                    chatStore.selectedDialog = dialog
+                                    this.props.navigation.navigate('Chat')
                                 }}>
                                 <Avatar source={{ uri: dialog.photoUrl }} rounded onPress={() => {
                                     this.props.navigation.navigate('ProfileImage', dialog.photoUrl)

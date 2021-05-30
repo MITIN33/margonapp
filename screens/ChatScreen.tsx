@@ -41,8 +41,6 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
         // if (Platform.OS !== 'ios')
         //     StatusBar.setBackgroundColor(AppTheme.colors.themeColor);
 
-        this.selectedDialog = this.props.route.params;
-
         this.user = {
             _id: userstore.user.userId,
             name: userstore.user.displayName,
@@ -64,16 +62,17 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
 
     componentWillUnmount() {
         this._isMounted = false
+        chatStore.selectedDialog = null;
         chatStore.saveChat(this.selectedDialog.dialogId, chatStore.dialogMessages)
         chatStore.setDialogMessages([]);
-        chatHubStore.isUserReadingChat(this.selectedDialog.otherUserId, false);
         dialogsStore.setUnMessageCountZero(this.selectedDialog.dialogId)
     }
 
     componentDidMount() {
         this._isMounted = true
-        chatHubStore.isUserReadingChat(this.selectedDialog.otherUserId, true);
+        this.selectedDialog = chatStore.selectedDialog;
         this.props.navigation.setOptions({ headerTitle: this.selectedDialog.name });
+        chatHubStore.isUserReadingChat(this.selectedDialog.otherUserId, this.selectedDialog.dialogId);
         chatStore.loadChatMessagesForDialogId(this.selectedDialog)
             .then(() => {
                 if (this._isMounted) {
@@ -118,6 +117,7 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
         const sentMessages = { ...messages[0], _id: messageId, pending: true }
 
         chatStore.addMessage(sentMessages)
+        console.log('sending message')
         chatHubStore.sendMessage(this.CreateMessageRequest(this.selectedDialog.dialogId, sentMessages))
             .then((chatResponse) => {
                 if (!this.selectedDialog.dialogId) {
@@ -132,6 +132,7 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
     }
 
     CreateMessageRequest(dialogId, messages: IMessage) {
+
         const msg: IMargonChatMessage = {
             message: messages.text,
             dialogId: dialogId,
@@ -238,7 +239,7 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
 
 
 
-        if (chatStore.isLoadingMessages) {
+        if (chatStore.isLoadingMessages || !this.selectedDialog) {
             return (
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><ActivityIndicator size='large' color={AppTheme.colors.themeColor} /></View>
             )

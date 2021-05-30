@@ -50,15 +50,6 @@ class DialogsStore {
     }
 
     @action
-    public setUserIsReading(userId, isUserReading) {
-        this.dialogs.forEach(x => {
-            if (x.otherUserId === userId) {
-                x.isUserReadingChat = isUserReading;
-            }
-        });
-    }
-
-    @action
     public setUserIsTyping(userId, IsTyping) {
         this.dialogs.forEach(x => {
             if (x.otherUserId === userId) {

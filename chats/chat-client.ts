@@ -9,7 +9,7 @@ import { userstore } from '../stores/UserStore';
 const chatHubUrl = "http://margonserver.azurewebsites.net/chatHub";
 
 const connection: signalR.HubConnection = new signalR.HubConnectionBuilder()
-  .withUrl(chatHubUrl, { accessTokenFactory: () => authStore.Token() , transport: signalR.HttpTransportType.WebSockets})
+  .withUrl(chatHubUrl, { accessTokenFactory: () => authStore.Token(), transport: signalR.HttpTransportType.WebSockets })
   .withAutomaticReconnect()
   .configureLogging(signalR.LogLevel.Error)
   .build();
@@ -33,6 +33,10 @@ connection.onclose(() => {
 connection.on("ReceiveMessage", (userId, message) => {
   chatStore.onMessageReceive(message);
   dialogsStore.addMessageToDialog(message);
+  if (chatStore.selectedDialog !== null) {
+    console.log('select dialog found, sending receipt back: ' + message.message);
+    connection.invoke("ChatReadByUser", userId, message.dialogId).catch((e) => console.log(e))
+  }
 });
 
 
@@ -40,12 +44,11 @@ connection.on('IsOnline', (userId, isOnline) => {
   dialogsStore.markUserOnlineForDialog(userId, isOnline);
 })
 
-connection.on('IsReadingChat', (userId, isReadingChat) => {
-  chatStore.markMessageRead(userId, isReadingChat)
+connection.on('ChatReadByUser', (userId, dialogId) => {
+  chatStore.markMessageRead(userId, dialogId)
 })
 
 connection.on('IsTyping', (userId) => {
-  chatStore.markMessageRead(userId, true)
   dialogsStore.setUserIsTyping(userId, true)
 })
 
@@ -53,7 +56,7 @@ connection.on('IsTyping', (userId) => {
 class ChatHubStore {
 
   public connect = () => {
-    if (connection.state === signalR.HubConnectionState.Disconnected && userstore.user !== null) {
+    if (connection.state === signalR.HubConnectionState.Disconnected) {
       connection.start()
         .then(() => {
           console.log('SignalR connection started')
@@ -79,9 +82,12 @@ class ChatHubStore {
     await connection.invoke("IsTyping", toUserId)
   }
 
-  public isUserReadingChat(thisUserId, isReading) {
-    connection.invoke("IsReadingChat", thisUserId, isReading)
-      .catch(() => console.log('Connection Error'))
+  public stop() {
+    connection.stop();
+  }
+
+  public isUserReadingChat(receiverUserId, dialogId) {
+    connection.invoke("ChatReadByUser", receiverUserId, dialogId).catch((err) => console.log(err))
   }
 
 }

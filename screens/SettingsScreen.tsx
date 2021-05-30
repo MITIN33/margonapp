@@ -54,7 +54,8 @@ class SettingsScreen extends Component<any, any> {
             list: list,
             list2: list2,
             availibilityFlag: true,
-            visible: false
+            visible: false,
+            imageUri: userstore.user?.photoUrl
         }
     }
 
@@ -112,7 +113,7 @@ class SettingsScreen extends Component<any, any> {
         pickImageAsync(async (result) => {
             var imageUri = result.uri
             this.toggleOverlay();
-            this.setState({ loading: true })
+            this.setState({ loading: true, imageUri })
             if (imageUri !== null) {
                 var path = `profile-pics/${userstore.user.userId}.jpeg`;
                 const ref = firebaseApp.storage().ref(path);
@@ -131,7 +132,7 @@ class SettingsScreen extends Component<any, any> {
             <ScrollView
                 refreshControl={<RefreshControl refreshing={this.state.loading} />}>
                 <View style={{ flex: 1, justifyContent: 'center', marginTop: 20, marginBottom: 20, alignItems: 'center' }}>
-                    <Avatar renderPlaceholderContent={<ActivityIndicator />} onPress={this.OnHandleImageClick} size={85} source={{ uri: userstore.user?.photoUrl }} rounded >
+                    <Avatar renderPlaceholderContent={<ActivityIndicator />} onPress={this.OnHandleImageClick} size={85} source={{ uri: this.state.imageUri }} rounded >
                         <Avatar.Accessory onPress={this.OnHandleEdit} size={20} source={require('../assets/edit-icon.png')} />
                     </Avatar>
                     <Text style={{ marginTop: 10, fontSize: 24 }}>{userstore.user?.displayName}</Text>

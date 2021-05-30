@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { ListItem, Avatar, Card, Image } from 'react-native-elements'
-import { FlatList, RefreshControl, Text, View } from 'react-native';
+import { FlatList, RefreshControl, StyleSheet, View, Text } from 'react-native';
 import { dialogsStore } from '../stores/DialogsStore';
 import { observer } from 'mobx-react';
 
@@ -16,12 +16,14 @@ class OnlineUsersScreen extends Component<any, any> {
     }
 
     renderItem = ({ item }) => (
-        <Card>
-            <View>
-                <Image onPress={() => this.onItemClick(item)} resizeMode='contain' style={{ width: 100, height: 100 }} source={{ uri: item.avatar }} />
-                <Text>{item.name}</Text>
-            </View>
-        </Card>
+        <View style={{ flex: 1, borderRadius: 10, elevation: 5, shadowColor: 'black', marginLeft: 5, marginRight: 5, marginBottom: 10, marginTop: 10, backgroundColor: 'white' }}>
+            <Avatar onPress={() => this.onItemClick(item)}
+                containerStyle={{ flex: 1, width: '100%', height: 170 }}
+                overlayContainerStyle={{ borderTopLeftRadius: 10, borderTopRightRadius: 10 }}
+                avatarStyle={{ resizeMode: 'cover' }}
+                source={{ uri: item.avatar }} />
+            <Text style={{ fontWeight: 'bold', padding: 5, fontSize: 15 }}>{item.name}</Text>
+        </View>
     )
 
 
@@ -43,6 +45,7 @@ class OnlineUsersScreen extends Component<any, any> {
     render() {
         return (
             <FlatList
+                style={{ backgroundColor: 'white', height: 50 }}
                 scrollEnabled
                 numColumns={2}
                 refreshControl={
@@ -59,3 +62,13 @@ class OnlineUsersScreen extends Component<any, any> {
 }
 
 export default OnlineUsersScreen;
+
+
+const styles = StyleSheet.create({
+    buttonContainer: {
+        flex: 1,
+    },
+    cardStyle: {
+
+    }
+});

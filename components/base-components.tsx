@@ -30,7 +30,7 @@ function Heading({ text }) {
 }
 
 function Title({ text }) {
-    return <Text style={{ color: Colors.primary, marginBottom: 5, alignSelf: 'flex-start', paddingLeft: 10, marginTop: 30 }}>
+    return <Text style={{ color: Colors.primary, marginBottom: 5, alignSelf: 'flex-start', paddingLeft: 10, marginTop: 10 }}>
         {text}
     </Text>
 }
