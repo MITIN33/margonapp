@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import ChatHistoryScreen from './ChatHistoryScreen';
 import OnlineUsersScreen from './OnlineUsersScreen';
-import AppTheme from '../theme/AppTheme';
+import AppTheme, { Colors } from '../theme/AppTheme';
 import { chatHubStore } from '../chats/chat-client';
 import { AppState } from 'react-native';
 
@@ -26,7 +26,7 @@ class TabNavigation extends Component {
 
         return (
             <>
-                <Tab.Navigator initialRouteName='Chats' tabBarOptions={{ style: { backgroundColor: AppTheme.colors.themeColor } }}>
+                <Tab.Navigator initialRouteName='Chats' tabBarOptions={{ style: { backgroundColor: Colors.themeColor } }}>
                     <Tab.Screen name="Chats" component={ChatHistoryScreen} />
                     <Tab.Screen name="Online" component={OnlineUsersScreen} />
                 </Tab.Navigator>

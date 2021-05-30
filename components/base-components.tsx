@@ -24,13 +24,13 @@ function TextInput(props: TextInputProps) {
 }
 
 function Heading({ text }) {
-    return <Text style={{ color: Colors.primary, fontSize: 30, fontWeight: 'bold', marginBottom: 30, marginTop: 30 }}>
+    return <Text style={{ color: Colors.themeColor, fontSize: 30, fontWeight: 'bold', marginBottom: 30, marginTop: 30 }}>
         {text}
     </Text>
 }
 
 function Title({ text }) {
-    return <Text style={{ color: Colors.primary, marginBottom: 5, alignSelf: 'flex-start', paddingLeft: 10, marginTop: 10 }}>
+    return <Text style={{ color: Colors.themeColor, marginBottom: 5, alignSelf: 'flex-start', paddingLeft: 10, marginTop: 10 }}>
         {text}
     </Text>
 }

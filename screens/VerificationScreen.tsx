@@ -10,8 +10,12 @@ import { margonAPI } from '../api/margon-server-api';
 
 class VerificationScreen extends Component<any, any> {
 
+    navigation;
+
     constructor(props) {
         super(props);
+        this.navigation = this.props.navigation;
+
         this.state = {
             isLoading: false,
             code: '',
@@ -31,7 +35,7 @@ class VerificationScreen extends Component<any, any> {
                 <OTPBox count={6} onChangeText={this.onTextChange} />
                 <Button
                     containerStyle={{ position: 'absolute', bottom: 50 }}
-                    buttonStyle={{ height: 50, borderRadius: 10, backgroundColor: Colors.primary }}
+                    buttonStyle={{ height: 50, borderRadius: 10, backgroundColor: Colors.themeColor }}
                     title="VERIFY"
                     loading={this.state.isLoading}
                     disabled={this.state.isDisabled}
@@ -58,8 +62,9 @@ class VerificationScreen extends Component<any, any> {
                             authStore.setUserSignedIn(true);
                         })
                         .catch((err) => {
+                            authStore.setUserSignedIn(false);
                             if (err.response.status == 404) {
-                                this.props.navigation.navigate('Profile')
+                                this.navigation.navigate('Profile')
                             }
                             else {
                                 ToastAndroid.show('Something went wrong, please try again later', ToastAndroid.LONG)

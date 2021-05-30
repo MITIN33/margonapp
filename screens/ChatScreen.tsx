@@ -207,7 +207,7 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
 
     renderSend = (props: Send['props']) => (
         <Send {...props} containerStyle={{ justifyContent: 'center' }}>
-            <MaterialIcons size={30} color={AppTheme.colors.themeColor} name={'send'} />
+            <MaterialIcons size={30} color={Colors.themeColor} name={'send'} />
         </Send>
     )
 
@@ -218,7 +218,7 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
     renderBubble = (props: any) => {
         return <Bubble wrapperStyle={{
             right: {
-                backgroundColor: AppTheme.colors.themeColor
+                backgroundColor: Colors.themeColor
             },
             left: {
                 backgroundColor: 'white'
@@ -229,7 +229,7 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
     renderLoading() {
         if (chatStore.isLoadingMessages)
             return (
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><ActivityIndicator size='large' color={AppTheme.colors.themeColor} /></View>
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><ActivityIndicator size='large' color={Colors.themeColor} /></View>
             )
     }
 
@@ -242,7 +242,7 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
 
         if (chatStore.isLoadingMessages || !this.selectedDialog) {
             return (
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><ActivityIndicator size='large' color={AppTheme.colors.themeColor} /></View>
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><ActivityIndicator size='large' color={Colors.themeColor} /></View>
             )
         }
 
@@ -251,7 +251,7 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
                 style={{ flex: 1 }}
                 accessibilityLabel='main'
             >
-                <StatusBar backgroundColor={Colors.primary} />
+                <StatusBar backgroundColor={Colors.themeColor} />
 
                 <GiftedChat
                     messages={chatStore.dialogMessages.slice()}

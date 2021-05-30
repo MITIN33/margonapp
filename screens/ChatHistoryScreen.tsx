@@ -68,7 +68,7 @@ class ChatHistoryScreen extends Component<any, any> {
                         onRefresh={this.onRefresh}
                     />}
             >
-                <StatusBar backgroundColor={Colors.primary} />
+                <StatusBar backgroundColor={Colors.themeColor} />
                 <View>
                     {
                         dialogsStore.dialogs.slice().sort(this.timeBasedsort).map((dialog, i) => (

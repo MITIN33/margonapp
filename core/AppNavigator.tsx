@@ -10,7 +10,7 @@ import { View } from "react-native";
 import SignupScreen from "../screens/SignUpScreen";
 import ChatScreen from "../screens/ChatScreen";
 import { ActivityIndicator } from "react-native";
-import AppTheme from "../theme/AppTheme";
+import AppTheme, { Colors } from "../theme/AppTheme";
 import { Avatar, Icon } from "react-native-elements";
 import GetStartedScreen from "../screens/GetStartedScreen";
 import VerificationScreen from "../screens/VerificationScreen";
@@ -104,7 +104,7 @@ class AppNavigator extends Component<any, any> {
 }
 
 const headerStyle = {
-    backgroundColor: AppTheme.colors.themeColor,
+    backgroundColor: Colors.themeColor,
     elevation: 0,
     shadowOpacity: 0
 };

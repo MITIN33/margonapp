@@ -6,7 +6,7 @@ import { dialogsStore } from '../stores/DialogsStore';
 import { locationStore } from '../stores/LocationStore';
 import { userstore } from '../stores/UserStore';
 
-const chatHubUrl = "http://margonserver.azurewebsites.net/chatHub";
+const chatHubUrl = "https://margonserver.azurewebsites.net/chatHub";
 
 const connection: signalR.HubConnection = new signalR.HubConnectionBuilder()
   .withUrl(chatHubUrl, { accessTokenFactory: () => authStore.Token(), transport: signalR.HttpTransportType.WebSockets })

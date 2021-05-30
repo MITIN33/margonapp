@@ -1,13 +1,13 @@
 import React, { Component } from "react";
-import { KeyboardAvoidingView, StatusBar, Text, ToastAndroid, View } from "react-native";
-import { Avatar, Button, ButtonGroup, Chip } from "react-native-elements";
+import { StatusBar, ToastAndroid, View } from "react-native";
+import { Avatar, Button, ButtonGroup } from "react-native-elements";
 import { firebaseApp } from "../api/firebase-config";
-import { margonAPI } from "../api/margon-server-api";
-import { CompatibleView, Heading, TextInput, Title } from "../components/base-components";
+import { Heading, TextInput, Title } from "../components/base-components";
 import { pickImageAsync } from "../components/media-utils";
 import { clientConstants } from "../models/constants";
 import { userstore } from "../stores/UserStore";
 import { Colors } from "../theme/AppTheme";
+import DatePicker from 'react-native-date-picker'
 
 class ProfileScreen extends Component<any, any> {
 
@@ -18,7 +18,8 @@ class ProfileScreen extends Component<any, any> {
             disabled: true,
             displayName: '',
             selectedIndex: 0,
-            imageUri: clientConstants.DEFAULT_IMAGE_URL
+            imageUri: clientConstants.DEFAULT_IMAGE_URL,
+            date: new Date()
         }
     }
 
@@ -34,6 +35,12 @@ class ProfileScreen extends Component<any, any> {
                 <Title text='DISPLAY NAME' />
                 <TextInput value={this.state.displayName} onChangeText={this.onChangeUserName} />
 
+                <Title text='DATE OF BIRTH' />
+                <DatePicker
+                    date={this.state.date}
+                    mode='date'
+                    onDateChange={(date)=>{console.log(date)}}
+                />
                 <Title text='GENDER' />
                 <ButtonGroup
                     onPress={this.updateIndex}
@@ -43,7 +50,7 @@ class ProfileScreen extends Component<any, any> {
                 />
                 <Button
                     containerStyle={{ marginTop: 30 }}
-                    buttonStyle={{ height: 50, borderRadius: 10, backgroundColor: Colors.primary }}
+                    buttonStyle={{ height: 50, borderRadius: 10, backgroundColor: Colors.themeColor }}
                     title="CREATE"
                     loading={this.state.loading}
                     disabled={this.state.disabled}
@@ -85,13 +92,14 @@ class ProfileScreen extends Component<any, any> {
                 userstore.addUser(user).then(() => {
                     this.setState({ loading: false })
                 })
-                .catch(()=>{ToastAndroid.show('Something went wrong, please try again later', ToastAndroid.LONG)})
+                    .catch(() => { ToastAndroid.show('Something went wrong, please try again later', ToastAndroid.LONG) })
             });
     }
 
     private async uploadImage(uid) {
-        if (this.state.imageUri !== null) {
+        if (this.state.imageUri !== null && this.state.imageUri !== clientConstants.DEFAULT_IMAGE_URL) {
             var path = `profile-pics/${uid}.jpeg`;
+            console.log('path: ' + this.state.imageUri)
             const ref = firebaseApp.storage().ref(path);
             await ref.putFile(this.state.imageUri)
             var url = await ref.getDownloadURL();

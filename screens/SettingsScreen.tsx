@@ -128,12 +128,13 @@ class SettingsScreen extends Component<any, any> {
 
     render() {
         const { availibilityFlag, visible } = this.state;
+
         return (
             <ScrollView
                 refreshControl={<RefreshControl refreshing={this.state.loading} />}>
                 <View style={{ flex: 1, justifyContent: 'center', marginTop: 20, marginBottom: 20, alignItems: 'center' }}>
                     <Avatar renderPlaceholderContent={<ActivityIndicator />} onPress={this.OnHandleImageClick} size={85} source={{ uri: this.state.imageUri }} rounded >
-                        <Avatar.Accessory onPress={this.OnHandleEdit} size={20} source={require('../assets/edit-icon.png')} />
+                        <Avatar.Accessory onPress={this.OnHandleEdit} size={20} source={require('../assets/edit-icon.jpg')} />
                     </Avatar>
                     <Text style={{ marginTop: 10, fontSize: 24 }}>{userstore.user?.displayName}</Text>
                 </View>

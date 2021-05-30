@@ -27,7 +27,7 @@ class LoginScreen extends Component<any, any> {
             <CompatibleView style={{ flex: 1, alignItems: 'center', padding: 20, backgroundColor: 'white' }} >
                 <StatusBar backgroundColor={'white'} />
                 {/* <Image source={require('../assets/chat-icon.png')} style={{ width: 100, height: 100, marginBottom: 50 }} /> */}
-                <Text style={{ color: Colors.primary, fontSize: 30, fontWeight: 'bold', marginBottom: 30, marginTop: 30 }}>What's your number ?</Text>
+                <Text style={{ color: Colors.themeColor, fontSize: 30, fontWeight: 'bold', marginBottom: 30, marginTop: 30 }}>{"What's your number ?"}</Text>
                 <Text style={{ color: 'black', marginBottom: 30, textAlign: 'center' }}>Pleas enter a valid phone number. We will send you a six digit code number to verify your account.</Text>
                 <TextInput
                     maxLength={14}
@@ -37,7 +37,7 @@ class LoginScreen extends Component<any, any> {
                 />
                 <Button
                     containerStyle={{ position: 'absolute', bottom: 50 }}
-                    buttonStyle={{ height: 50, borderRadius: 10, backgroundColor: Colors.primary }}
+                    buttonStyle={{ height: 50, borderRadius: 10, backgroundColor: Colors.themeColor }}
                     titleStyle={{ color: 'white' }}
                     title='SEND CODE'
                     loading={this.state.isLoading} disabled={this.state.isDisabled}
