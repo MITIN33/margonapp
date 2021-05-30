@@ -38,7 +38,7 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
 
     constructor(props) {
         super(props);
-        
+
         this.user = {
             _id: userstore.user.userId,
             name: userstore.user.displayName,
@@ -80,7 +80,7 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
     }
 
 
-    
+
 
     componentWillUnmount() {
         this._isMounted = false
@@ -117,7 +117,6 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
         const sentMessages = { ...messages[0], _id: messageId, pending: true }
 
         chatStore.addMessage(sentMessages)
-        console.log('sending message')
         chatHubStore.sendMessage(this.CreateMessageRequest(this.selectedDialog.dialogId, sentMessages))
             .then((chatResponse) => {
                 if (!this.selectedDialog.dialogId) {
@@ -173,7 +172,9 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
 
     renderAvatarImage = (props) => {
         return (
-            <Avatar source={{ uri: props.currentMessage.user.avatar }} rounded ></Avatar>
+            <Avatar source={{ uri: props.currentMessage.user.avatar }} rounded >
+                {this.selectedDialog.isUserOnline ? <Avatar.Accessory source={require('../assets/online-image.png')} /> : null}
+            </Avatar>
         )
     };
 
