@@ -21,7 +21,7 @@ class DialogsStore {
     public isDialogsLoading = true;
 
     @observable
-    public isLoading = false;
+    public isLoadingNearByUsers = false;
 
     private savingData = false;
 
@@ -41,7 +41,7 @@ class DialogsStore {
 
     @action
     public setIsLoading(value) {
-        this.isLoading = value;
+        this.isLoadingNearByUsers = value;
     }
 
     @action
@@ -127,8 +127,8 @@ class DialogsStore {
                         this.setDialogList(dialogsResponse);
                         this.saveDialogData(dialogsResponse)
                     }
-                }).
-                    catch((e) => console.log(e))
+                })
+                    .catch((e) => console.log(e))
                     .finally(() => {
                         this.setIsDialogLoading(false);
                     });

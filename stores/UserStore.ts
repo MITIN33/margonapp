@@ -2,7 +2,7 @@ import { action, makeObservable, observable } from 'mobx';
 import { firebaseApp } from '../api/firebase-config';
 import { margonAPI } from '../api/margon-server-api';
 import { asyncStorage } from '../models/async-storage';
-import { IUser } from '../models/user-models';
+import { IUser } from '../models/chat-models';
 import { authStore } from './AuthStore';
 class UserStore {
 

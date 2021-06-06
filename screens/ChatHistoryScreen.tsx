@@ -18,8 +18,6 @@ class ChatHistoryScreen extends Component<any, any> {
 
     constructor(props) {
         super(props);
-        // if (Platform.OS !== 'ios')
-        //     StatusBar.setBackgroundColor('#71afe5');
         if (Platform.OS !== 'web')
             LogBox.ignoreLogs(['Setting a timer']);
         this.state = {

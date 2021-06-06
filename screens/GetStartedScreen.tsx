@@ -21,13 +21,13 @@ class GetStartedScreen extends Component<any, any> {
                 <StatusBar backgroundColor={Colors.themeColor} />
                 {/* <Image source={require('../assets/chat-icon.png')} style={{ width: 100, height: 100, marginBottom: 20 }} /> */}
 
-                <Text style={{ fontSize: 40, color: 'white', fontFamily: 'sans-serif' }}>margon</Text>
+                <Text style={{ fontSize: 40, color: 'white', fontFamily: 'country-side' }}>margon</Text>
                 <Button
-                    containerStyle={{ position: 'absolute', bottom: 50 }}
-                    buttonStyle={{ height: 50, borderRadius: 10, backgroundColor: Colors.lightGrey1 }}
+                    containerStyle={{ position: 'absolute', bottom: 50, height: 50 }}
+                    buttonStyle={{ backgroundColor: Colors.lightGrey1, borderRadius: 10, height: 50 }}
                     titleStyle={{ color: Colors.themeColor }}
                     title="Get Started"
-                    onPress={() => this.props.navigation.navigate('Profile')} />
+                    onPress={() => this.props.navigation.navigate('Login')} />
             </View>
         );
     }

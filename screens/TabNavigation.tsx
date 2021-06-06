@@ -5,8 +5,11 @@ import OnlineUsersScreen from './OnlineUsersScreen';
 import AppTheme, { Colors } from '../theme/AppTheme';
 import { chatHubStore } from '../chats/chat-client';
 import { AppState } from 'react-native';
+import { userstore } from '../stores/UserStore';
+import { appSettings } from '../stores/AppStore';
+import { observer } from 'mobx-react';
 
-class TabNavigation extends Component {
+class TabNavigation extends Component<any, any> {
 
 
     constructor(props) {

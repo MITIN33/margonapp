@@ -108,7 +108,9 @@ class ChatStore {
                                     this.saveChat(dialog.dialogId, this.dialogMessages);
                                 }
                             })
-                    }).finally(() => this.setIsLoadingMessage(false));
+                    })
+                    .catch((e) => console.log(e))
+                    .finally(() => this.setIsLoadingMessage(false));
             }
         } catch (error) {
             console.log(error)
@@ -116,7 +118,7 @@ class ChatStore {
         }
     }
 
-    public unloadChatData(){
+    public unloadChatData() {
         this.saveChat(this.selectedDialog.dialogId, this.dialogMessages)
         this.setDialogMessages([])
         this.selectedDialog = null
@@ -139,7 +141,7 @@ class ChatStore {
                     this.chatContinuationToken = response.data['continuationToken'];
                 }
             } catch (error) {
-                throw error;
+                console.log(error)
             }
         }
     }

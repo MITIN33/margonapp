@@ -25,13 +25,15 @@ class VerificationScreen extends Component<any, any> {
 
     render() {
 
-        const { phoneNumber } = this.props.route.params;
+        const phoneNumber = this.props.route.params;
         return (
             <View style={{ flex: 1, alignItems: 'center', padding: 20, backgroundColor: 'white' }}>
-                <StatusBar backgroundColor={Colors.lightGrey1} />
+                <StatusBar backgroundColor='white' />
                 <Heading text='Enter the code' />
-                <Text style={{ color: 'black', marginBottom: 30, textAlign: 'center' }}>{`Please enter the code sent to ${phoneNumber}.`}</Text>
-
+                <Text style={{marginBottom: 20, maxWidth: 200, textAlign: 'center'}}>
+                    <Text style={{color: 'black'}}>{'Please enter the code sent to  '}</Text>
+                    <Text style={{ fontWeight: 'bold', fontSize: 15 }}>"{phoneNumber}"</Text>
+                </Text>
                 <OTPBox count={6} onChangeText={this.onTextChange} />
                 <Button
                     containerStyle={{ position: 'absolute', bottom: 50 }}

@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
-import { ListItem, Avatar, Card, Image } from 'react-native-elements'
+import { Avatar } from 'react-native-elements'
 import { FlatList, RefreshControl, StyleSheet, View, Text } from 'react-native';
 import { dialogsStore } from '../stores/DialogsStore';
 import { observer } from 'mobx-react';
+import { MaterialIcons } from '@expo/vector-icons'
+import { Colors } from '../theme/AppTheme';
 
 @observer
 class OnlineUsersScreen extends Component<any, any> {
-
 
     /**
      *
@@ -16,13 +17,16 @@ class OnlineUsersScreen extends Component<any, any> {
     }
 
     renderItem = ({ item }) => (
-        <View style={{ flex: 1, borderRadius: 10, elevation: 5, shadowColor: 'black', marginLeft: 5, marginRight: 5, marginBottom: 10, marginTop: 10, backgroundColor: 'white' }}>
+        <View style={styles.userCardWrapper}>
             <Avatar onPress={() => this.onItemClick(item)}
                 containerStyle={{ flex: 1, width: '100%', height: 170 }}
-                overlayContainerStyle={{ borderTopLeftRadius: 10, borderTopRightRadius: 10 }}
+                overlayContainerStyle={{ borderTopLeftRadius: 5, borderTopRightRadius: 5 }}
                 avatarStyle={{ resizeMode: 'cover' }}
                 source={{ uri: item.avatar }} />
-            <Text style={{ fontWeight: 'bold', padding: 5, fontSize: 15 }}>{item.name}</Text>
+            <View style={{ flex: 1, flexDirection: 'row', padding: 5, justifyContent: 'space-between' }}>
+                <Text style={{ fontFamily: 'Robosto', fontWeight: 'bold', color: 'black', fontSize: 15 }}>{item.name}</Text>
+                <Text style={{ fontFamily: 'Robosto', fontSize: 15 }}>{'2km'}</Text>
+            </View>
         </View>
     )
 
@@ -50,7 +54,7 @@ class OnlineUsersScreen extends Component<any, any> {
                 numColumns={2}
                 refreshControl={
                     <RefreshControl
-                        refreshing={false}
+                        refreshing={dialogsStore.isLoadingNearByUsers}
                         onRefresh={dialogsStore.loadNearByUsers}
                     />}
                 keyExtractor={(item) => item._id}
@@ -62,3 +66,18 @@ class OnlineUsersScreen extends Component<any, any> {
 }
 
 export default OnlineUsersScreen;
+
+
+const styles = StyleSheet.create({
+    userCardWrapper: {
+        flex: 1,
+        borderRadius: 5,
+        elevation: 5,
+        shadowColor: 'black',
+        marginLeft: 5,
+        marginRight: 5,
+        marginBottom: 10,
+        marginTop: 10,
+        backgroundColor: 'white'
+    }
+})

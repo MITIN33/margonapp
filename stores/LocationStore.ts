@@ -43,7 +43,15 @@ class LocationStore {
         if (await this.getPermissionAsync(Permissions.LOCATION)) {
             Location.watchPositionAsync({ distanceInterval: 10 }, (location: Location.LocationObject) => {
                 if (firebaseApp.auth().currentUser !== null)
-                    margonAPI.sendLocation(location)
+                    var loc: Location.LocationObject = {
+                        coords: {
+                            ...location.coords,
+                            longitude: 77.6646237,
+                            latitude: 12.9019969
+                        },
+                        timestamp: Date.now()
+                    };
+                margonAPI.sendLocation(loc)
             })
         }
     }

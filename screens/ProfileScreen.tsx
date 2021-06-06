@@ -49,7 +49,7 @@ class ProfileScreen extends Component<any, any> {
                     containerStyle={{ height: 50 }}
                 />
                 <Button
-                    containerStyle={{ marginTop: 30 }}
+                    containerStyle={{ position: 'absolute', bottom: 50, height: 50 }}
                     buttonStyle={{ height: 50, borderRadius: 10, backgroundColor: Colors.themeColor }}
                     title="CREATE"
                     loading={this.state.loading}

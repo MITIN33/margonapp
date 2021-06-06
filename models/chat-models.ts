@@ -11,6 +11,18 @@ export interface IDialogs {
     isUserTyping?: boolean,
     isArchived?: boolean
 }
+
+export interface IUser {
+    userName?: string,
+    displayName?: string,
+    photoUrl?: string,
+    userId?: string,
+    phoneNumber?: string,
+    maxRangeInMeter: number,
+    isDiscoverable: boolean,
+    blockedUserList: IChatUser[]
+}
+
 export interface IAttachments {
     id: string,
     url: string,

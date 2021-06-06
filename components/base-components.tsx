@@ -14,7 +14,7 @@ function DisabledChatToolbar(props) {
     return <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}><Text>You can not send message to this chat</Text></View>
 }
 
-function TextInput(props: TextInputProps) {
+function TextInput(props) {
     return <RNEInput
         inputContainerStyle={{ borderWidth: 1, borderRadius: 5, paddingLeft: 15 }}
         inputStyle={{ marginTop: 0 }}

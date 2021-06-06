@@ -1,11 +1,10 @@
 import { observer } from 'mobx-react';
 import React, { Component } from 'react';
 import { StatusBar, Text } from 'react-native';
-import { Button, Image } from 'react-native-elements';
+import { Button } from 'react-native-elements';
 import { firebaseApp } from '../api/firebase-config';
-import { CompatibleView, TextInput } from '../components/base-components';
+import { CompatibleView, Heading, TextInput } from '../components/base-components';
 import { authStore } from '../stores/AuthStore';
-import { userstore } from '../stores/UserStore';
 import { Colors } from '../theme/AppTheme';
 
 @observer
@@ -27,7 +26,7 @@ class LoginScreen extends Component<any, any> {
             <CompatibleView style={{ flex: 1, alignItems: 'center', padding: 20, backgroundColor: 'white' }} >
                 <StatusBar backgroundColor={'white'} />
                 {/* <Image source={require('../assets/chat-icon.png')} style={{ width: 100, height: 100, marginBottom: 50 }} /> */}
-                <Text style={{ color: Colors.themeColor, fontSize: 30, fontWeight: 'bold', marginBottom: 30, marginTop: 30 }}>{"What's your number ?"}</Text>
+                <Heading text="What's you number ?" />
                 <Text style={{ color: 'black', marginBottom: 30, textAlign: 'center' }}>Pleas enter a valid phone number. We will send you a six digit code number to verify your account.</Text>
                 <TextInput
                     maxLength={14}
@@ -36,8 +35,8 @@ class LoginScreen extends Component<any, any> {
                     onChangeText={this.onChangeText}
                 />
                 <Button
-                    containerStyle={{ position: 'absolute', bottom: 50 }}
-                    buttonStyle={{ height: 50, borderRadius: 10, backgroundColor: Colors.themeColor }}
+                    containerStyle={{ position: 'absolute', bottom: 50, height: 50 }}
+                    buttonStyle={{ backgroundColor: Colors.themeColor, borderRadius: 10, height: 50 }}
                     titleStyle={{ color: 'white' }}
                     title='SEND CODE'
                     loading={this.state.isLoading} disabled={this.state.isDisabled}
@@ -60,11 +59,11 @@ class LoginScreen extends Component<any, any> {
     sendCode = () => {
         console.log('sending code to number')
         this.setState({ isLoading: true, isDisabled: true })
-
-        firebaseApp.auth().signInWithPhoneNumber(this.state.phoneNumber)
+        const {phoneNumber} = this.state;
+        firebaseApp.auth().signInWithPhoneNumber(phoneNumber)
             .then((result) => {
                 authStore.confirmationResult = result;
-                this.props.navigation.navigate('Verification', this.state.phoneNumber);
+                this.props.navigation.navigate('Verification', phoneNumber);
                 console.log('code sent')
             })
             .finally(() => this.setState({ isLoading: false, isDisabled: true }))

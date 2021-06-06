@@ -6,39 +6,76 @@ import LoginScreen from "../screens/LoginScreen";
 import { userstore } from "../stores/UserStore";
 import TabNavigation from "../screens/TabNavigation";
 import SettingsScreen from "../screens/SettingsScreen";
-import { View } from "react-native";
-import SignupScreen from "../screens/SignUpScreen";
+import { View, Text, ToastAndroid } from "react-native";
 import ChatScreen from "../screens/ChatScreen";
 import { ActivityIndicator } from "react-native";
-import AppTheme, { Colors } from "../theme/AppTheme";
+import { Colors } from "../theme/AppTheme";
 import { Avatar, Icon } from "react-native-elements";
 import GetStartedScreen from "../screens/GetStartedScreen";
 import VerificationScreen from "../screens/VerificationScreen";
 import { authStore } from "../stores/AuthStore";
 import { Button } from 'react-native-elements';
 import ProfileImageScreen from "../screens/ProfileImageScreen";
-import { locationStore } from "../stores/LocationStore";
 import ProfileScreen from "../screens/ProfileScreen";
 import { firebaseApp } from "../api/firebase-config";
+import NetInfo from "@react-native-community/netinfo";
+import { appSettings } from "../stores/AppStore";
 
 const Stack = createStackNavigator();
 
 @observer
 class AppNavigator extends Component<any, any> {
 
+    netSubscribe;
+
     constructor(props) {
         super(props);
+        NetInfo.addEventListener
         this.state = {
             isLoading: true,
         }
     }
 
+
     componentDidMount() {
         this.setState({ isLoading: true })
-        firebaseApp.auth().onAuthStateChanged((user) => {
-            userstore.loadUser(user)
-                .finally(() => this.setState({ isLoading: false }));
+
+        this.netSubscribe = NetInfo.addEventListener(state => {
+            appSettings.setIsconnected(state.isConnected);
         });
+
+        NetInfo.fetch().then(state => {
+            if (state.isConnected) {
+                firebaseApp.auth().onAuthStateChanged((user) => {
+                    userstore.loadUser(user)
+                        .finally(() => this.setState({ isLoading: false }));
+                });
+            }
+            else {
+                userstore.loadUser(null)
+                    .finally(() => this.setState({ isLoading: false }));
+            }
+        });
+
+    }
+
+
+    componentWillUnmount() {
+        this.netSubscribe();
+    }
+
+    header = (navigation) => {
+        const firstName = userstore.user?.displayName;
+        const photoUrl = userstore.user?.photoUrl;
+
+        return <View style={{ flex: 1, flexDirection: 'row' }}>
+            <Avatar source={{ uri: photoUrl }} containerStyle={{ paddingLeft: 15, width: 50 }} rounded ></Avatar>
+            <Text>{firstName}</Text>
+            <Button
+                type='clear'
+                icon={<Icon name='options-outline' size={25} type='ionicon' style={{ marginRight: 10 }} />}
+                onPress={() => navigation.navigate('Settings')} />
+        </View>
     }
 
     render() {
@@ -55,11 +92,11 @@ class AppNavigator extends Component<any, any> {
                         (
                             <>
                                 <Stack.Screen name="Home" component={TabNavigation} options={({ navigation }) => ({
-                                    title: firstName,
+                                    headerShown: true,
+                                    headerTitle: firstName,
                                     headerLeft: () => (
                                         <Avatar source={{ uri: photoUrl }} containerStyle={{ paddingLeft: 15, width: 50 }} rounded ></Avatar>
                                     ),
-                                    headerShown: true,
                                     headerRight: () => (
                                         <Button
                                             type='clear'
