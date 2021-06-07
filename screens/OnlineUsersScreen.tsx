@@ -51,7 +51,6 @@ class OnlineUsersScreen extends Component<any, any> {
             <FlatList
                 style={{ backgroundColor: 'white', height: 50 }}
                 scrollEnabled
-                numColumns={2}
                 refreshControl={
                     <RefreshControl
                         refreshing={dialogsStore.isLoadingNearByUsers}

@@ -2,18 +2,12 @@ import React from "react";
 import { View } from "react-native";
 import { Text } from "react-native-elements";
 import { ListItem } from "react-native-elements";
+import { MgListItem } from "../models/chat-models";
 
 
 interface IMgListProps {
-    title: string,
+    title?: string,
     listItems: MgListItem[],
-}
-
-interface MgListItem {
-    title: string,
-    Subtitle: () => string,
-    renderRightWidget: () => any,
-    action: any
 }
 
 class MgList extends React.Component<IMgListProps, any> {
@@ -27,7 +21,7 @@ class MgList extends React.Component<IMgListProps, any> {
                         <ListItem key={i} bottomDivider onPress={item.action}>
                             <ListItem.Content>
                                 <ListItem.Title>{item.title}</ListItem.Title>
-                                <ListItem.Subtitle>{item.Subtitle()}</ListItem.Subtitle>
+                                <ListItem.Subtitle>{item.Subtitle && item.Subtitle()}</ListItem.Subtitle>
                             </ListItem.Content>
                             {item.renderRightWidget && item.renderRightWidget()}
                         </ListItem>

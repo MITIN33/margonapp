@@ -1,4 +1,4 @@
-import { IUser } from "../models/user-models";
+import { IUser } from "../models/chat-models";
 import { authStore } from "../stores/AuthStore";
 import { margonServer } from "./axios-instance";
 
@@ -14,6 +14,14 @@ class MargonAPI {
     public async ExitChat(dialogId) {
         var authtoken = await authStore.Token();
         var response = await margonServer.delete(`/dialogs/${dialogId}`, { headers: { 'Authorization': `Bearer ${authtoken}` } });
+
+        console.log(JSON.stringify(response));
+        return response;
+    }
+
+    public async ClearChat(dialogId) {
+        var authtoken = await authStore.Token();
+        var response = await margonServer.delete(`/dialogs/${dialogId}/clearchat`, { headers: { 'Authorization': `Bearer ${authtoken}` } });
         return response;
     }
 
@@ -57,6 +65,18 @@ class MargonAPI {
     public async GetChatList(dialogId: string, continuationToken: string) {
         var authtoken = await authStore.Token();
         var response = await margonServer.get(`/dialogs/${dialogId}/chats`, { params: { limit: 10, continuationToken }, headers: { 'Authorization': `Bearer ${authtoken}` } });
+        return response;
+    }
+
+    public async GetBlockedUserList() {
+        var authtoken = await authStore.Token();
+        var response = await margonServer.get(`/users/blockedList`, { headers: { 'Authorization': `Bearer ${authtoken}` } });
+        return response;
+    }
+
+    public async BlockUnblockUser(dialogId: string) {
+        var authtoken = await authStore.Token();
+        var response = await margonServer.post(`/dialogs/${dialogId}/blockunblockuser`, null, { headers: { 'Authorization': `Bearer ${authtoken}` } });
         return response;
     }
 }

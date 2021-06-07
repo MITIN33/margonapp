@@ -1,7 +1,7 @@
 import { Linking } from 'expo'
 import * as Permissions from 'expo-permissions'
 
-import { Alert } from 'react-native'
+import { Alert, ToastAndroid } from 'react-native'
 import { locationStore } from '../stores/LocationStore'
 import * as ImagePicker from 'react-native-image-picker'
 
@@ -68,4 +68,12 @@ export async function takePictureAsync(callback) {
       maxWidth: 200
     }, callback);
   }
+}
+
+export function showShortErrorMessage(message) {
+  ToastAndroid.show(message, ToastAndroid.SHORT);
+}
+
+export function showLongErrorMessage(message) {
+  ToastAndroid.show(message, ToastAndroid.LONG);
 }

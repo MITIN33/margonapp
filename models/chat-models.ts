@@ -9,7 +9,7 @@ export interface IDialogs {
     isUserOnline?: boolean,
     isUserReadingChat?: boolean,
     isUserTyping?: boolean,
-    isArchived?: boolean
+    blockedByUserIds?: string[]
 }
 
 export interface IUser {
@@ -18,9 +18,10 @@ export interface IUser {
     photoUrl?: string,
     userId?: string,
     phoneNumber?: string,
-    maxRangeInMeter: number,
-    isDiscoverable: boolean,
-    blockedUserList: IChatUser[]
+    bio?: string,
+    maxRangeInKm?: number,
+    isDiscoverable?: number,
+    blockedUserList?: IChatUser[]
 }
 
 export interface IAttachments {
@@ -50,7 +51,8 @@ export interface IMargonChatMessage {
 export interface IChatUser {
     _id: string,
     name: string,
-    avatar: string
+    avatar: string,
+    distance?: number
 }
 
 export enum MediaType {
@@ -61,4 +63,24 @@ export enum MediaType {
 export enum ScreenName {
     HomeScreen,
     ChatScreen
+}
+
+
+export interface ISettingsState {
+    imageUri?: string,
+    availibilityFlag?: boolean,
+    distance?: number,
+    displayName?: string,
+    editableBoxVisible: boolean,
+    distanceOverlayVisible: boolean,
+    visible: boolean,
+    list: MgListItem[],
+    loading: boolean
+}
+
+export interface MgListItem {
+    title: string,
+    Subtitle?: () => any,
+    renderRightWidget?: () => any | undefined,
+    action?: any | undefined
 }

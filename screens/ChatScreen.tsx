@@ -1,12 +1,12 @@
-import { View, Platform, ActivityIndicator, Text } from "react-native";
+import { View, ActivityIndicator, Text, Modal } from "react-native";
 import React from "react";
-import { Bubble, GiftedChat, IMessage, InputToolbar, Send } from "react-native-gifted-chat";
-import { Avatar, Image } from 'react-native-elements';
+import { Bubble, GiftedChat, IMessage, Send } from "react-native-gifted-chat";
+import { Avatar, Image, ListItem } from 'react-native-elements';
 import { StatusBar } from "react-native";
 import { MaterialIcons } from '@expo/vector-icons'
 import AccessoryBar from "../components/accessory-bar";
 import CustomView from "../components/custom-view";
-import AppTheme, { Colors } from "../theme/AppTheme";
+import { Colors } from "../theme/AppTheme";
 import { userstore } from "../stores/UserStore";
 import { IDialogs, IMargonChatMessage } from "../models/chat-models";
 import { chatStore } from "../stores/ChatStore";
@@ -14,6 +14,8 @@ import { observer } from "mobx-react";
 import { dialogsStore } from "../stores/DialogsStore";
 import { chatHubStore } from "../chats/chat-client";
 import { DisabledChatToolbar } from "../components/base-components";
+import ChatContextMenu from "../components/context-menu";
+import { Overlay } from "react-native-elements";
 
 export interface IChatScreenSettingStore {
     inverted: boolean,
@@ -22,7 +24,8 @@ export interface IChatScreenSettingStore {
     isLoadingEarlier: boolean,
     appIsReady: boolean,
     isTyping: boolean,
-    isLoading: boolean
+    isLoading: boolean,
+    showContextMenu: boolean
 }
 
 @observer
@@ -55,23 +58,27 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
             isLoadingEarlier: false,
             appIsReady: false,
             isTyping: false,
-            isLoading: true
+            isLoading: true,
+            showContextMenu: true
         }
     }
 
     componentDidMount() {
         this._isMounted = true
-        chatStore.selectedDialog = this.selectedDialog;
-        this.props.navigation.setOptions({ headerTitle: this.selectedDialog.name });
-        chatHubStore.isUserReadingChat(this.selectedDialog.otherUserId, this.selectedDialog.dialogId);
+        dialogsStore.setSelectedDialog(this.selectedDialog);
+        this.props.navigation.setOptions({
+            headerTitle: this.selectedDialog.name,
+            headerRight: () => <ChatContextMenu navigation={this.props.navigation} />
+        });
+        if (!dialogsStore.hasUserBlocked())
+            chatHubStore.isUserReadingChat(this.selectedDialog.otherUserId, this.selectedDialog.dialogId);
         chatStore.loadChatMessagesForDialogId(this.selectedDialog)
             .then(() => {
                 if (this._isMounted) {
                     // init with only system messages
                     this.setState({
                         appIsReady: true,
-                        isTyping: false,
-                        isLoading: false
+                        isTyping: false
                     })
                 }
             })
@@ -90,7 +97,7 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
 
     onInputTextChange = (text: string) => {
 
-        if (this.sentTypingMessageSignal && text.length > 0) {
+        if (this.sentTypingMessageSignal && text.length > 0 && !dialogsStore.hasUserBlocked()) {
             this.sentTypingMessageSignal = false
             chatHubStore.sendTypingMessage(this.selectedDialog.otherUserId)
                 .catch(() => console.log('Error in sendingmessage'))
@@ -173,7 +180,7 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
     renderAvatarImage = (props) => {
         return (
             <Avatar source={{ uri: props.currentMessage.user.avatar }} rounded >
-                {this.selectedDialog.isUserOnline ? <Avatar.Accessory source={require('../assets/online-image.png')} /> : null}
+                {/* {(this.selectedDialog.isUserOnline && dialogsStore.blockedListCount() == 0) ? <Avatar.Accessory source={require('../assets/online-image.png')} /> : null} */}
             </Avatar>
         )
     };
@@ -201,6 +208,39 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
         }
     }
 
+    renderContextMenu() {
+
+        const menuItems = [
+            {
+                title: 'Block',
+                action: () => { }
+            },
+            {
+                title: 'Exit',
+                action: () => { }
+            }
+        ]
+
+        return (
+            <Modal
+                transparent
+                visible={this.state.showContextMenu}
+                onRequestClose={() => this.setState({ showContextMenu: false })}
+            >
+                <View style={{ width: 120, top: 20, right: 15, zIndex: 10000, position: 'absolute' }}>
+                    {menuItems.map((item, i) => (
+                        <ListItem key={i} bottomDivider onPress={item.action}>
+                            <ListItem.Content>
+                                <ListItem.Title>{item.title}</ListItem.Title>
+                            </ListItem.Content>
+                        </ListItem>
+                    ))}
+                </View>
+
+            </Modal>
+        )
+    };
+
     renderAccessory = () => (
         <AccessoryBar onSend={this.onSendFromUser} isTyping={this.setIsTypingFunc} />
     )
@@ -226,33 +266,28 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
         }}
             {...props} />
     }
+
     renderLoading() {
-        if (chatStore.isLoadingMessages)
-            return (
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><ActivityIndicator size='large' color={Colors.themeColor} /></View>
-            )
+        return (
+            <Overlay isVisible={chatStore.isLoading} statusBarTranslucent>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <ActivityIndicator size='large' color={Colors.themeColor} />
+                    <Text style={{ fontSize: 20, color: 'black', padding: 10 }}>Loading...</Text>
+                </View>
+            </Overlay>
+        )
     }
 
 
-
     render() {
-
-
-
-
-        if (chatStore.isLoadingMessages || !this.selectedDialog) {
-            return (
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><ActivityIndicator size='large' color={Colors.themeColor} /></View>
-            )
-        }
-
+        let isBlocked = dialogsStore.selectedDialog && dialogsStore.selectedDialog.blockedByUserIds && dialogsStore.selectedDialog.blockedByUserIds.length > 0;
         return (
             <View
                 style={{ flex: 1 }}
                 accessibilityLabel='main'
             >
                 <StatusBar backgroundColor={Colors.themeColor} />
-
+                {this.renderLoading()}
                 <GiftedChat
                     messages={chatStore.dialogMessages.slice()}
                     onSend={this.onSend}
@@ -262,7 +297,7 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
                     onLoadEarlier={this.onLoadEarlier}
                     isLoadingEarlier={this.state.isLoadingEarlier}
                     renderSend={this.renderSend}
-                    renderInputToolbar={this.selectedDialog.isArchived ? () => <DisabledChatToolbar /> : undefined}
+                    renderInputToolbar={isBlocked ? () => <DisabledChatToolbar /> : undefined}
                     renderMessageImage={this.renderMessageImage}
                     isTyping={this.selectedDialog.isUserTyping}
                     renderBubble={this.renderBubble}

@@ -1,7 +1,8 @@
 import { action, makeObservable, observable } from "mobx";
-import { Platform } from "react-native";
+import { Platform, ToastAndroid } from "react-native";
 import { GiftedChat, IMessage } from "react-native-gifted-chat";
 import { margonAPI } from "../api/margon-server-api";
+import { showShortErrorMessage } from "../components/media-utils";
 import { asyncStorage } from "../models/async-storage";
 import { IDialogs, IMargonChatMessage } from "../models/chat-models";
 import { dialogsStore } from "./DialogsStore";
@@ -21,7 +22,8 @@ class ChatStore {
     @observable
     public isLoadingMessages: boolean;
 
-    public selectedDialog: IDialogs;
+    @observable
+    public isLoading: boolean = false;
 
     //private memebers
     private chatContinuationToken: string
@@ -35,6 +37,11 @@ class ChatStore {
     @action
     public setDialogMessages(messages) {
         this.dialogMessages = messages;
+    }
+
+    @action
+    public setLoading(value) {
+        this.isLoading = value;
     }
 
     @action
@@ -70,7 +77,7 @@ class ChatStore {
     }
 
     public markMessageRead(userId, dialogId) {
-        if (this.selectedDialog && this.selectedDialog.dialogId === dialogId) {
+        if (this.dialogMessages !== null) {
             var newList = []
             this.dialogMessages.map(x => {
                 newList.push({
@@ -82,11 +89,6 @@ class ChatStore {
             })
             this.setDialogMessages(newList);
         }
-    }
-
-    public async sendMessage(message) {
-        var messageResponse = await margonAPI.SendMessage(message);
-        return messageResponse.data;
     }
 
     public async loadChatMessagesForDialogId(dialog: IDialogs) {
@@ -105,7 +107,6 @@ class ChatStore {
                                 if (response.data) {
                                     this.setDialogMessages(this.convertToLocaLChatMessages(response.data['items']));
                                     this.chatContinuationToken = response.data['continuationToken'];
-                                    this.saveChat(dialog.dialogId, this.dialogMessages);
                                 }
                             })
                     })
@@ -118,10 +119,52 @@ class ChatStore {
         }
     }
 
+    public blockUnBlockUser = (callback) => {
+        if (dialogsStore.selectedDialog !== null) {
+            this.setLoading(true);
+            margonAPI.BlockUnblockUser(dialogsStore.selectedDialog.dialogId)
+                .then(() => {
+                    dialogsStore.markDialogBlocked();
+                    callback();
+                })
+                .catch((err) => showShortErrorMessage('Something went wrong'))
+                .finally(() => this.setLoading(false))
+        }
+    }
+
+
+    public clearChat = () => {
+        if (dialogsStore.selectedDialog !== null) {
+            this.setLoading(true);
+            margonAPI.ClearChat(dialogsStore.selectedDialog.dialogId)
+                .then(() => {
+                    this.setDialogMessages([])
+                    this.saveChat(dialogsStore.selectedDialog.dialogId, []);
+                })
+                .catch((err) => console.log(JSON.stringify(err.response)))
+                .finally(() => this.setLoading(false))
+        }
+    }
+
+    public exitChat = (callback) => {
+        if (dialogsStore.selectedDialog !== null) {
+            this.setLoading(true);
+            margonAPI.ExitChat(dialogsStore.selectedDialog.dialogId)
+                .then(() => {
+                    var filteredDailogList = dialogsStore.dialogs.filter(x => x.dialogId !== dialogsStore.selectedDialog.dialogId)
+                    dialogsStore.setDialogList(filteredDailogList);
+                    dialogsStore.saveDialogData();
+                    callback();
+                })
+                .catch((err) => console.log(JSON.stringify(err.response)))
+                .finally(() => this.setLoading(false))
+        }
+    }
+
     public unloadChatData() {
-        this.saveChat(this.selectedDialog.dialogId, this.dialogMessages)
+        this.saveChat(dialogsStore.selectedDialog.dialogId, this.dialogMessages)
         this.setDialogMessages([])
-        this.selectedDialog = null
+        dialogsStore.setSelectedDialog(null);
     }
 
     public async loadEarlierChatMessagesForDialogId(dialog: IDialogs) {
@@ -137,7 +180,7 @@ class ChatStore {
                         Platform.OS !== 'web',
                     )
                     this.setDialogMessages(messages);
-                    this.saveChat(dialog.dialogId, this.dialogMessages);
+                    // this.saveChat(dialog.dialogId, this.dialogMessages);
                     this.chatContinuationToken = response.data['continuationToken'];
                 }
             } catch (error) {

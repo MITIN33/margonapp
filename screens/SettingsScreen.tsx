@@ -1,11 +1,9 @@
 import React, { Component } from 'react';
-import { View, Alert, ActivityIndicator, RefreshControl, StyleSheet, Animated } from 'react-native';
+import { View, Alert, ActivityIndicator, RefreshControl, StyleSheet, ToastAndroid } from 'react-native';
 import { userstore } from '../stores/UserStore';
 import { Button, Text, Avatar, Icon, Overlay, BottomSheet, ListItem } from 'react-native-elements';
-import { GestureResponderEvent } from 'react-native';
 import { Switch } from 'react-native-elements';
 import {
-    takePictureAsync,
     pickImageAsync,
 } from '../components/media-utils';
 import { ScrollView, TouchableWithoutFeedback } from 'react-native-gesture-handler';
@@ -15,13 +13,12 @@ import { firebaseApp } from '../api/firebase-config';
 import { margonAPI } from '../api/margon-server-api';
 import { observer } from 'mobx-react';
 import MgList from '../components/mg-list-item';
-import { Colors } from '../theme/AppTheme';
 import { TextInput } from '../components/base-components';
 import { Slider } from 'react-native-elements/dist/slider/Slider';
-import { values } from 'mobx';
+import { ISettingsState, IUser } from '../models/chat-models';
 
 @observer
-class SettingsScreen extends Component<any, any> {
+class SettingsScreen extends Component<any, ISettingsState> {
 
     constructor(props) {
         super(props);
@@ -29,11 +26,10 @@ class SettingsScreen extends Component<any, any> {
         const list = [
             {
                 title: 'Phone Number',
-                Subtitle: () => userstore.user.phoneNumber,
-                action: ''
+                Subtitle: () => userstore.user?.phoneNumber
             },
             {
-                title: 'Distance (km)',
+                title: 'Reach (km)',
                 Subtitle: () => this.state.distance,
                 action: this.toggleDistanceOverLay
             },
@@ -49,44 +45,35 @@ class SettingsScreen extends Component<any, any> {
             loading: false,
             visible: false,
             editableBoxVisible: false,
-            distanceOverlayVisible: false,
+            distanceOverlayVisible: false
         }
     }
 
     renderRightWidget = () => {
-        return <Switch value={this.state.availibilityFlag} onValueChange={this.updateAvailibilityFlag} />
+        return <Switch value={this.state.availibilityFlag} onValueChange={() => this.setState({ availibilityFlag: !this.state.availibilityFlag })} />
     }
 
-    toggleDistanceOverLay = () => {
-        this.setState({ distanceOverlayVisible: !this.state.distanceOverlayVisible })
-    };
-
-
-    onImageChangeClick = () => {
-        this.toggleImageChangeOverlay();
-    };
-    OnHandleImageClick = () => {
-        try {
-            const currentUserPic = userstore.user.photoUrl;
-            this.props.navigation.navigate('ProfileImage', currentUserPic);
-        }
-        catch (ex) {
-            // logging
-        }
-    }
-
+    renderEditTextBox = () => (
+        <Overlay overlayStyle={styles.overlayStyle} isVisible={this.state.editableBoxVisible} onBackdropPress={this.toggleEditBox}>
+            <Text style={styles.overlayTitleStyle}>Edit Display Name</Text>
+            <TextInput value={this.state.displayName} onChangeText={(text) => this.setState({ displayName: text })} />
+            <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
+                <Button type='clear' containerStyle={{ width: 60 }} title='Done' onPress={this.toggleEditBox} />
+            </View>
+        </Overlay>
+    );
 
     renderBottomSheet = () => {
         const list = [
             {
                 title: 'Camera',
                 icon: 'camera',
-                action: this.onImageUpload
+                action: () => pickImageAsync(this.onImageUpload)
             },
             {
                 title: 'Gallery',
                 icon: 'image',
-                action: this.onImageUpload
+                action: () => pickImageAsync(this.onImageUpload)
             }
         ];
 
@@ -112,39 +99,126 @@ class SettingsScreen extends Component<any, any> {
     }
 
     renderDistanceOverLay = () => {
-        const { user } = userstore;
-
         return (
             <Overlay overlayStyle={styles.overlayStyle} statusBarTranslucent isVisible={this.state.distanceOverlayVisible} onBackdropPress={this.toggleDistanceOverLay}>
                 <Text style={styles.overlayTitleStyle}>{`Reach ${this.state.distance} (in km)`}</Text>
                 <Slider
                     thumbStyle={{ height: 40, width: 40, backgroundColor: 'transparent' }}
-                    thumbProps={{
-                        Component: Animated.Image,
-                        source: {
-                            uri: 'https://s3.amazonaws.com/uifaces/faces/twitter/ladylexy/128.jpg',
-                        },
-                    }}
-                    value={this.state.distance} step={1} onValueChange={this.updateDistance} maximumValue={50} minimumValue={10} />
+                    value={this.state.distance} step={1} onValueChange={(value) => this.setState({ distance: value })} maximumValue={50} minimumValue={10} />
                 <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
                     <Button type='clear' containerStyle={{ width: 60 }} title='Done' onPress={this.toggleDistanceOverLay} />
                 </View>
             </Overlay>
         )
+    }
 
+    onRefreshSettings = () => {
+        this.setState({ loading: true })
+        userstore.refreshUser()
+            .then(user => {
+                console.log(JSON.stringify(user))
+                this.setState({
+                    imageUri: userstore.user?.photoUrl,
+                    availibilityFlag: user.isDiscoverable == 1 ? true : false,
+                    distance: user.maxRangeInKm,
+                    displayName: user.displayName
+                });
+            })
+            .finally(() => this.setState({ loading: false }))
+    }
+
+    toggleDistanceOverLay = () => {
+        this.setState({ distanceOverlayVisible: !this.state.distanceOverlayVisible })
+    };
+
+    toggleImageChangeOverlay = () => {
+        this.setState({ visible: !this.state.visible });
+    };
+
+    toggleEditBox = () => {
+        this.setState({ editableBoxVisible: !this.state.editableBoxVisible })
+    }
+
+    saveProfileData = async () => {
+        let user: IUser = {};
+        let isUserUpdated = false;
+        if (userstore.user.displayName !== this.state.displayName) {
+            user.displayName = this.state.displayName;
+            isUserUpdated = true;
+        }
+        let flag = userstore.user.isDiscoverable == 1 ? true : false;
+        if (flag !== this.state.availibilityFlag) {
+            user.isDiscoverable = this.state.availibilityFlag ? 1 : 2
+            isUserUpdated = true;
+        }
+        if (userstore.user.maxRangeInKm !== this.state.distance) {
+            user.maxRangeInKm = this.state.distance;
+            isUserUpdated = true;
+        }
+        if (userstore.user.photoUrl !== this.state.imageUri) {
+            var path = `profile-pics/${userstore.user.userId}.jpeg`;
+            try {
+                const ref = firebaseApp.storage().ref(path);
+                await ref.putFile(user.photoUrl)
+                var url = await ref.getDownloadURL();
+                user.photoUrl = url;
+                isUserUpdated = true;
+            } catch { }
+        }
+
+        if (isUserUpdated) {
+            this.setState({ loading: true })
+            userstore.updateUser(user)
+                .catch(() => ToastAndroid.show('Something went wrong, please try again', ToastAndroid.SHORT))
+                .finally(() => this.setState({ loading: false }))
+        }
+        else {
+            console.log('No prop chagned for user');
+        }
     }
 
 
-    updateDistance = (value) => {
-        this.setState({ distance: value });
+    componentDidMount() {
+        const { user } = userstore;
+        this.setState({
+            imageUri: userstore.user?.photoUrl,
+            availibilityFlag: user.isDiscoverable == 1 ? true : false,
+            distance: user.maxRangeInKm,
+            displayName: user.displayName
+        });
+        this.props.navigation.setOptions({
+            headerRight: () => (
+                <Icon iconStyle={{ marginRight: 15 }} type='material' name='done' onPress={this.saveProfileData} />
+            ),
+        })
+    }
+
+    render() {
+
+        return (
+            <ScrollView
+                refreshControl={<RefreshControl refreshing={this.state.loading} onRefresh={this.onRefreshSettings} />}>
+                <View style={styles.profileViewStyle}>
+                    <Avatar renderPlaceholderContent={<ActivityIndicator />} onPress={this.OnHandleImageClick} size={70} source={{ uri: this.state.imageUri }} rounded >
+                        <Avatar.Accessory onPress={this.onImageChangeClick} size={15} source={require('../assets/edit-icon.jpg')} />
+                    </Avatar>
+                    <View style={{ flex: 1, flexDirection: 'column', margin: 20 }} >
+                        <Text style={{ color: 'grey', fontSize: 12 }}>Display Name</Text>
+                        <Text style={{ fontSize: 24 }} onPress={this.toggleEditBox}>{this.state.displayName}</Text>
+                    </View>
+
+                </View>
+                {this.renderBottomSheet()}
+                {this.renderDistanceOverLay()}
+                <MgList title={'Profile'} listItems={this.state.list} />
+                <Button TouchableComponent={TouchableWithoutFeedback} titleStyle={{ color: 'red', fontWeight: '100' }} containerStyle={{ height: 50, marginTop: 30 }} buttonStyle={{ height: 50, backgroundColor: 'white' }} title='Sign Out' onPress={this.OnHandleSignOut} />
+                {this.renderEditTextBox()}
+            </ScrollView>
+        );
     }
 
 
-    updateAvailibilityFlag = () => {
-        const { availibilityFlag } = this.state;
-        this.setState({ availibilityFlag: !availibilityFlag })
-    }
-
+    // component events 
 
     OnHandleSignOut = () => {
         Alert.alert("Sign Out", 'Are you sure you want to sign out?', [
@@ -163,104 +237,28 @@ class SettingsScreen extends Component<any, any> {
         ]);
     };
 
-    toggleImageChangeOverlay = () => {
-        const { visible } = this.state;
-        this.setState({ visible: !visible });
-    };
-
-    onImageUpload = () => {
-        pickImageAsync(async (result) => {
-            this.toggleImageChangeOverlay();
-            if (!result.didCancel) {
-                var imageUri = result.uri
-                this.setState({ loading: true, imageUri })
-                if (imageUri !== null) {
-                    var path = `profile-pics/${userstore.user.userId}.jpeg`;
-                    const ref = firebaseApp.storage().ref(path);
-                    await ref.putFile(imageUri)
-                    var url = await ref.getDownloadURL();
-                    var user = await margonAPI.updateUser({ photoUrl: url })
-                    userstore.setUser(user);
-                    this.setState({ loading: false })
-                }
-            }
-        })
-    }
-
-    toggleEditBox = () => {
-        this.setState({ editableBoxVisible: !this.state.editableBoxVisible })
-    }
-
-    onDisplayNameChange = (text) => {
-        this.setState({ displayName: text })
-    }
-
-    saveDisplayName = () => {
-        this.toggleEditBox();
-    }
-
-    renderEditTextBox = () => (
-        <Overlay overlayStyle={styles.overlayStyle} isVisible={this.state.editableBoxVisible} onBackdropPress={this.toggleEditBox}>
-            <Text style={styles.overlayTitleStyle}>Edit Display Name</Text>
-            <TextInput value={this.state.displayName} onChangeText={this.onDisplayNameChange} />
-            <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
-                <Button type='clear' containerStyle={{ width: 80 }} title='Cancel' onPress={this.toggleEditBox} />
-                <Button type='clear' containerStyle={{ width: 60 }} title='Done' onPress={this.saveDisplayName} />
-            </View>
-        </Overlay>
-    );
-
-    saveProfileData = () => {
-        var user = {
-            displayName: this.state.displayName,
-            imageUri: this.state.imageUri
+    onImageUpload = async (result) => {
+        this.toggleImageChangeOverlay();
+        if (!result.didCancel) {
+            var imageUri = result.uri
+            this.setState({ imageUri: imageUri })
         }
     }
 
-
-    componentDidMount() {
-        const { user } = userstore;
-        this.setState({
-            imageUri: userstore.user?.photoUrl,
-            availibilityFlag: user.isDiscoverable,
-            distance: user.maxRangeInMeter,
-            displayName: user.displayName
-        });
-        this.props.navigation.setOptions({
-            headerRight: () => (
-                <Icon iconStyle={{ marginRight: 15 }} type='material' name='done' onPress={this.saveProfileData} />
-            ),
-        })
-    }
-
-    render() {
-
-        return (
-            <ScrollView
-                refreshControl={<RefreshControl refreshing={this.state.loading} />}>
-                <View style={styles.profileViewStyle}>
-                    <Avatar renderPlaceholderContent={<ActivityIndicator />} onPress={this.OnHandleImageClick} size={70} source={{ uri: this.state.imageUri }} rounded >
-                        <Avatar.Accessory onPress={this.onImageChangeClick} size={15} source={require('../assets/edit-icon.jpg')} />
-                    </Avatar>
-                    <View style={{ flex: 1, flexDirection: 'column', margin: 20 }} >
-                        <Text style={{ color: 'grey', fontSize: 12 }}>Display Name</Text>
-                        <Text style={{ fontSize: 24 }} onPress={this.toggleEditBox}>{userstore.user?.displayName}</Text>
-
-                        {/* <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <Icon name='edit' style={{ marginLeft: 5 }} type='material' size={15} />
-                        </View> */}
-                    </View>
-
-                </View>
-                {this.renderBottomSheet()}
-                {this.renderDistanceOverLay()}
-                <MgList title={'Profile'} listItems={this.state.list} />
-                <Button TouchableComponent={TouchableWithoutFeedback} titleStyle={{ color: 'red', fontWeight: '100' }} containerStyle={{ height: 50, marginTop: 30 }} buttonStyle={{ height: 50, backgroundColor: 'white' }} title='Sign Out' onPress={this.OnHandleSignOut} />
-                {this.renderEditTextBox()}
-            </ScrollView>
-        );
+    onImageChangeClick = () => {
+        this.toggleImageChangeOverlay();
+    };
+    OnHandleImageClick = () => {
+        try {
+            const currentUserPic = userstore.user.photoUrl;
+            this.props.navigation.navigate('ProfileImage', currentUserPic);
+        }
+        catch (ex) {
+            // logging
+        }
     }
 }
+
 
 const styles = StyleSheet.create({
     overlayStyle: {

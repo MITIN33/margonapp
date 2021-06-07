@@ -40,12 +40,20 @@ class UserStore {
         }
 
         //fetch and update the user props from server
-        margonAPI.Me()
-            .then((response) => {
-                this.setUser(response.data);
-                asyncStorage.saveData(this.USER_DATA_KEY, response.data);
-            })
-            .catch(() => { })
+        this.refreshUser();
+
+    }
+
+    public async refreshUser() {
+        try {
+            var response = await margonAPI.Me()
+            this.setUser(response.data);
+            asyncStorage.saveData(this.USER_DATA_KEY, response.data);
+            return response.data
+        }
+        catch (err) {
+            console.log(err)
+        }
     }
 
     public async addUser(user) {
@@ -57,6 +65,15 @@ class UserStore {
         } catch (error) { }
 
     }
+
+    public async updateUser(user: IUser) {
+        try {
+            var user = await margonAPI.updateUser(user)
+            this.setUser(user);
+            asyncStorage.saveData(this.USER_DATA_KEY, user);
+        } catch (error) { }
+    }
+
 
     public Logout = () => {
         firebaseApp.auth().signOut().then(() => {

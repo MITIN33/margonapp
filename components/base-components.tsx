@@ -2,6 +2,7 @@ import * as React from 'react';
 import { TextInputProps } from 'react-native';
 import { KeyboardAvoidingView, Platform, Text, View } from 'react-native';
 import { Button as RNEButton, Input as RNEInput } from 'react-native-elements';
+import { dialogsStore } from '../stores/DialogsStore';
 import AppTheme, { Colors } from '../theme/AppTheme';
 
 
@@ -11,7 +12,10 @@ function Container(props) {
 }
 
 function DisabledChatToolbar(props) {
-    return <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}><Text>You can not send message to this chat</Text></View>
+
+    let message = dialogsStore.hasUserBlocked() ? 'Unblock the user to send them message' : 'You can not send message to this chat';
+
+    return <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}><Text>{message}</Text></View>
 }
 
 function TextInput(props) {

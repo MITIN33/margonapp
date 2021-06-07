@@ -62,7 +62,7 @@ class ChatHistoryScreen extends Component<any, any> {
             <ScrollView
                 refreshControl={
                     <RefreshControl
-                        refreshing={dialogsStore.isDialogsLoading}
+                        refreshing={dialogsStore.isDialogLoading}
                         onRefresh={this.onRefresh}
                     />}
             >
@@ -78,7 +78,7 @@ class ChatHistoryScreen extends Component<any, any> {
                                 <Avatar source={{ uri: dialog.photoUrl }} rounded onPress={() => {
                                     this.props.navigation.navigate('ProfileImage', dialog.photoUrl)
                                 }}>
-                                    {dialog.isUserOnline ? <Avatar.Accessory source={require('../assets/online-image.png')} /> : null}
+                                    {(dialog.isUserOnline && dialog.blockedByUserIds && dialog.blockedByUserIds.length == 0) ? <Avatar.Accessory source={require('../assets/online-image.png')} /> : null}
                                 </Avatar>
                                 <ListItem.Content>
                                     <ListItem.Title>{dialog.name}</ListItem.Title>
@@ -86,7 +86,7 @@ class ChatHistoryScreen extends Component<any, any> {
                                 </ListItem.Content>
                                 <View style={{ justifyContent: 'flex-end' }}>
                                     {dialog.unreadMessageCount !== 0 ? <Badge value={dialog.unreadMessageCount} /> : null}
-                                    <Text style={styles.ratingText}>{this.getDate(dialog.lastMessageDateSent)}</Text>
+                                    <Text style={styles.ratingText}>{dialog.lastMessageDateSent !== 0 ? this.getDate(dialog.lastMessageDateSent) : ''}</Text>
                                 </View>
                             </ListItem>
                         ))

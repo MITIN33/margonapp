@@ -108,9 +108,9 @@ class AppNavigator extends Component<any, any> {
                                 <Stack.Screen name="Chat" component={ChatScreen} options={{
                                     title: 'Chat',
                                     headerShown: true,
-                                    headerRight: () => (
-                                        <Icon name='ellipsis-vertical-outline' type='ionicon' />
-                                    ),
+                                    // headerRight: () => (
+                                    //     <Icon name='ellipsis-vertical-outline' type='ionicon' />
+                                    // ),
                                     headerStyle: headerStyle
                                 }} />
                                 <Stack.Screen name="Settings" component={SettingsScreen} options={{

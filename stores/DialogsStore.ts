@@ -1,4 +1,4 @@
-import { action, makeAutoObservable, observable } from "mobx";
+import { action, computed, makeAutoObservable, observable } from "mobx";
 import { margonAPI } from "../api/margon-server-api";
 import { asyncStorage } from "../models/async-storage";
 import { IChatUser, IDialogs, IMargonChatMessage, ScreenName } from "../models/chat-models";
@@ -18,10 +18,17 @@ class DialogsStore {
     public nearByUsers: IChatUser[] = [];
 
     @observable
-    public isDialogsLoading = true;
+    public isDialogLoading = true;
 
     @observable
     public isLoadingNearByUsers = false;
+
+    public selectedDialog: IDialogs = null;
+
+    @action
+    public setSelectedDialog(dialog) {
+        this.selectedDialog = dialog;
+    }
 
     private savingData = false;
 
@@ -36,7 +43,7 @@ class DialogsStore {
 
     @action
     public setIsDialogLoading(value) {
-        this.isDialogsLoading = value;
+        this.isDialogLoading = value;
     }
 
     @action
@@ -73,8 +80,8 @@ class DialogsStore {
             console.log('Creating new dialog ' + chatMessage.user.name)
             dialog = this.createDialog(chatMessage);
             this.dialogs.push(dialog)
-            this.saveDialogData(this.dialogs);
         }
+        this.saveDialogData();
         this.setUserIsTyping(dialog.otherUserId, false);
     };
 
@@ -95,6 +102,31 @@ class DialogsStore {
             }
         })
     };
+
+    @action
+    public markDialogBlocked() {
+        if (this.selectedDialog.blockedByUserIds.includes(userstore.user.userId)) {
+            var filteredList = this.selectedDialog.blockedByUserIds.filter(x => x !== userstore.user.userId)
+            this.selectedDialog.blockedByUserIds = filteredList;
+        }
+        else {
+            this.selectedDialog.blockedByUserIds.push(userstore.user.userId)
+        }
+    }
+
+    public isUserBlocked() {
+        if (this.selectedDialog !== null) {
+            return this.selectedDialog.blockedByUserIds.includes(this.selectedDialog.otherUserId);
+        }
+        return false;
+    }
+
+    public hasUserBlocked() {
+        if (this.selectedDialog !== null && this.selectedDialog.blockedByUserIds) {
+            return this.selectedDialog.blockedByUserIds.includes(userstore.user.userId);
+        }
+        return false;
+    }
 
     public loadNearByUsers = () => {
         this.setIsLoading(true);
@@ -125,7 +157,7 @@ class DialogsStore {
                     if (response.data) {
                         var dialogsResponse = response.data['items']
                         this.setDialogList(dialogsResponse);
-                        this.saveDialogData(dialogsResponse)
+                        this.saveDialogData()
                     }
                 })
                     .catch((e) => console.log(e))
@@ -161,10 +193,10 @@ class DialogsStore {
         return newDialog;
     }
 
-    private async saveDialogData(dialogs: IDialogs[]) {
+    public async saveDialogData() {
         if (!this.savingData) {
             this.savingData = true;
-            var list = dialogs.slice();
+            var list = this.dialogs.slice();
             list.forEach(x => x.isUserOnline = false);
             await asyncStorage.saveData(this.DIALOG_KEY, list)
             this.savingData = false;

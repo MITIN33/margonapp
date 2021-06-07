@@ -33,7 +33,7 @@ connection.onclose(() => {
 connection.on("ReceiveMessage", (userId, message) => {
   chatStore.onMessageReceive(message);
   dialogsStore.addMessageToDialog(message);
-  if (chatStore.selectedDialog !== null) {
+  if (dialogsStore.selectedDialog !== null) {
     connection.invoke("ChatReadByUser", userId, message.dialogId).catch((e) => console.log(e))
   }
 });
