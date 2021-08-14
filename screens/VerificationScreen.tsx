@@ -36,8 +36,8 @@ class VerificationScreen extends Component<any, any> {
                 </Text>
                 <OTPBox count={6} onChangeText={this.onTextChange} />
                 <Button
-                    containerStyle={{ position: 'absolute', bottom: 50 }}
-                    buttonStyle={{ height: 50, borderRadius: 10, backgroundColor: Colors.themeColor }}
+                    containerStyle={{ position: 'absolute', bottom: 50, height: 50 }}
+                    buttonStyle={{ height: 50, borderRadius: 10, backgroundColor: Colors.primary }}
                     title="VERIFY"
                     loading={this.state.isLoading}
                     disabled={this.state.isDisabled}

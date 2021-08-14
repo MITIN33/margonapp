@@ -37,25 +37,6 @@ class ChatHistoryScreen extends Component<any, any> {
         return b.lastMessageDateSent - a.lastMessageDateSent;
     }
 
-    onLongPressAction(dialog) {
-        Alert.alert('Exit Chat', 'Sure you want to Exit?', [
-            {
-                text: "Cancel",
-                onPress: () => console.log("Cancel Pressed")
-            },
-            {
-                text: "OK", onPress: () => {
-                    margonAPI.ExitChat(dialog.dialogId)
-                        .then(() => {
-                            ToastAndroid.show('Exit from group completed', ToastAndroid.LONG);
-                        })
-                }
-            }
-        ])
-
-    }
-
-
     render() {
 
         return (
@@ -71,7 +52,6 @@ class ChatHistoryScreen extends Component<any, any> {
                     {
                         dialogsStore.dialogs.slice().sort(this.timeBasedsort).map((dialog, i) => (
                             <ListItem key={i} bottomDivider
-                                onLongPress={() => this.onLongPressAction(dialog)}
                                 onPress={() => {
                                     this.props.navigation.navigate('Chat', dialog)
                                 }}>

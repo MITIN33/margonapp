@@ -31,7 +31,7 @@ class UserStore {
 
     public loadUser = async (user) => {
         var cacheUser = await asyncStorage.getData(this.USER_DATA_KEY);
-        if (cacheUser === null && user === null) {
+        if (user === null || cacheUser === null) {
             authStore.setUserSignedIn(false);
         }
         else {
@@ -71,7 +71,7 @@ class UserStore {
             var user = await margonAPI.updateUser(user)
             this.setUser(user);
             asyncStorage.saveData(this.USER_DATA_KEY, user);
-        } catch (error) { }
+        } catch (error) { throw error }
     }
 
 

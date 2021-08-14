@@ -49,8 +49,9 @@ class OnlineUsersScreen extends Component<any, any> {
     render() {
         return (
             <FlatList
-                style={{ backgroundColor: 'white', height: 50 }}
+                style={{ backgroundColor: 'white', height: 50, padding: 10 }}
                 scrollEnabled
+                numColumns={2}
                 refreshControl={
                     <RefreshControl
                         refreshing={dialogsStore.isLoadingNearByUsers}

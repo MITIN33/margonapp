@@ -17,15 +17,15 @@ class GetStartedScreen extends Component<any, any> {
 
     render() {
         return (
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', flexDirection: 'column', padding: 20, backgroundColor: Colors.themeColor }}>
-                <StatusBar backgroundColor={Colors.themeColor} />
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', flexDirection: 'column', padding: 20, backgroundColor: Colors.primary }}>
+                <StatusBar backgroundColor={Colors.primary} />
                 {/* <Image source={require('../assets/chat-icon.png')} style={{ width: 100, height: 100, marginBottom: 20 }} /> */}
 
                 <Text style={{ fontSize: 40, color: 'white', fontFamily: 'country-side' }}>margon</Text>
                 <Button
                     containerStyle={{ position: 'absolute', bottom: 50, height: 50 }}
                     buttonStyle={{ backgroundColor: Colors.lightGrey1, borderRadius: 10, height: 50 }}
-                    titleStyle={{ color: Colors.themeColor }}
+                    titleStyle={{ color: Colors.primary }}
                     title="Get Started"
                     onPress={() => this.props.navigation.navigate('Login')} />
             </View>

@@ -36,7 +36,7 @@ class LoginScreen extends Component<any, any> {
                 />
                 <Button
                     containerStyle={{ position: 'absolute', bottom: 50, height: 50 }}
-                    buttonStyle={{ backgroundColor: Colors.themeColor, borderRadius: 10, height: 50 }}
+                    buttonStyle={{ backgroundColor: Colors.primary, borderRadius: 10, height: 50 }}
                     titleStyle={{ color: 'white' }}
                     title='SEND CODE'
                     loading={this.state.isLoading} disabled={this.state.isDisabled}

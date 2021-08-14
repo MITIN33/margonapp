@@ -1,8 +1,8 @@
 import React, { Component } from "react";
-import { StatusBar, ToastAndroid, View } from "react-native";
+import { StatusBar, ToastAndroid, View, StyleSheet, Text, ActivityIndicator } from "react-native";
 import { Avatar, Button, ButtonGroup } from "react-native-elements";
 import { firebaseApp } from "../api/firebase-config";
-import { Heading, TextInput, Title } from "../components/base-components";
+import { CompatibleView, TextInput, Title } from "../components/base-components";
 import { pickImageAsync } from "../components/media-utils";
 import { clientConstants } from "../models/constants";
 import { userstore } from "../stores/UserStore";
@@ -23,40 +23,36 @@ class ProfileScreen extends Component<any, any> {
         }
     }
 
-
     render() {
         const buttons = ['MALE', 'FEMALE', 'OTHERS']
         return (
-            <View style={{ flex: 1, alignItems: 'center', padding: 20, backgroundColor: 'white' }}>
+            <CompatibleView style={{ flex: 1, alignItems: 'center', justifyContent: 'flex-start', padding: 20, backgroundColor: 'white' }}>
                 <StatusBar backgroundColor={'white'} />
-                <Heading text='Lets Build Your Profile' />
-                <Avatar size={150} source={{ uri: this.state.imageUri }} rounded onPress={this.selectImage} />
+                <View style={{ flex: 1, justifyContent: 'space-between', width: '100%' }}>
+                    <View style={{ alignItems: 'center' }}>
+                        <Avatar size={150} containerStyle={{ margin: 20 }} source={{ uri: this.state.imageUri }} rounded onPress={this.selectImage} />
+                        <TextInput placeholder='Display Name' value={this.state.displayName} onChangeText={this.onChangeUserName} />
+                        <TextInput placeholder='Bio (120 words)' multiline numberOfLines={2} />
 
-                <Title text='DISPLAY NAME' />
-                <TextInput value={this.state.displayName} onChangeText={this.onChangeUserName} />
-
-                <Title text='DATE OF BIRTH' />
-                <DatePicker
-                    date={this.state.date}
-                    mode='date'
-                    onDateChange={(date)=>{console.log(date)}}
-                />
-                <Title text='GENDER' />
-                <ButtonGroup
-                    onPress={this.updateIndex}
-                    selectedIndex={this.state.selectedIndex}
-                    buttons={buttons}
-                    containerStyle={{ height: 50 }}
-                />
-                <Button
-                    containerStyle={{ position: 'absolute', bottom: 50, height: 50 }}
-                    buttonStyle={{ height: 50, borderRadius: 10, backgroundColor: Colors.themeColor }}
-                    title="CREATE"
-                    loading={this.state.loading}
-                    disabled={this.state.disabled}
-                    onPress={this.createAccount}
-                />
-            </View>
+                        <ButtonGroup
+                            onPress={this.updateIndex}
+                            selectedIndex={this.state.selectedIndex}
+                            buttons={buttons}
+                            containerStyle={{ height: 40 }}
+                        />
+                    </View>
+                    <View>
+                        <Button
+                            containerStyle={{ marginTop: 20, height: 50 }}
+                            buttonStyle={{ height: 50, borderRadius: 10, backgroundColor: Colors.primary }}
+                            title="CREATE"
+                            loading={this.state.loading}
+                            disabled={this.state.disabled}
+                            onPress={this.createAccount}
+                        />
+                    </View>
+                </View>
+            </CompatibleView>
         );
     }
 
@@ -66,8 +62,10 @@ class ProfileScreen extends Component<any, any> {
 
     selectImage = () => {
         pickImageAsync((result) => {
-            var imageUri = result.uri
-            this.setState({ imageUri })
+            if (!result.didCancel) {
+                var imageUri = result.uri
+                this.setState({ imageUri })
+            }
         })
     }
 
@@ -93,7 +91,9 @@ class ProfileScreen extends Component<any, any> {
                     this.setState({ loading: false })
                 })
                     .catch(() => { ToastAndroid.show('Something went wrong, please try again later', ToastAndroid.LONG) })
-            });
+                    .finally(() => { this.setState({ isLoading: false, disabled: false }) })
+            })
+            .finally(() => { this.setState({ isLoading: false, disabled: false }) });
     }
 
     private async uploadImage(uid) {
@@ -112,4 +112,16 @@ class ProfileScreen extends Component<any, any> {
 
 export default ProfileScreen;
 
+
+
+const styles = StyleSheet.create({
+    profileViewStyle: {
+        marginTop: 10,
+        flex: 1,
+        flexDirection: 'row',
+        backgroundColor: 'white',
+        alignItems: 'center',
+        paddingLeft: 15
+    }
+})
 

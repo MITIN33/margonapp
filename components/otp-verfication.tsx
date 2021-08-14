@@ -68,6 +68,6 @@ const style = StyleSheet.create({
         borderWidth: 1,
         borderRadius: 4,
         textAlign: 'center',
-        borderColor: Colors.themeColor
+        borderColor: Colors.primary
     }
 });

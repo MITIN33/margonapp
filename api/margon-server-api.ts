@@ -70,7 +70,7 @@ class MargonAPI {
 
     public async GetBlockedUserList() {
         var authtoken = await authStore.Token();
-        var response = await margonServer.get(`/users/blockedList`, { headers: { 'Authorization': `Bearer ${authtoken}` } });
+        var response = await margonServer.get(`/dialogs/blockedList`, { headers: { 'Authorization': `Bearer ${authtoken}` } });
         return response;
     }
 

@@ -103,7 +103,7 @@ class ChatContextMenu extends React.Component<any, any> {
             <Overlay
                 statusBarTranslucent
                 transparent
-                animationType='none'
+                animationType='fade'
                 backdropStyle={{ backgroundColor: 'transparent' }}
                 overlayStyle={{ position: 'absolute', top: 50, right: 20, width: 150, padding: 0 }}
                 isVisible={this.state.showContextMenu}

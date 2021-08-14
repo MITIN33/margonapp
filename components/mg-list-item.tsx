@@ -21,7 +21,7 @@ class MgList extends React.Component<IMgListProps, any> {
                         <ListItem key={i} bottomDivider onPress={item.action}>
                             <ListItem.Content>
                                 <ListItem.Title>{item.title}</ListItem.Title>
-                                <ListItem.Subtitle>{item.Subtitle && item.Subtitle()}</ListItem.Subtitle>
+                                {item.Subtitle && <ListItem.Subtitle>{item.Subtitle()}</ListItem.Subtitle>}
                             </ListItem.Content>
                             {item.renderRightWidget && item.renderRightWidget()}
                         </ListItem>

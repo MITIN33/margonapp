@@ -23,11 +23,19 @@ class DialogsStore {
     @observable
     public isLoadingNearByUsers = false;
 
+    @observable
+    public blockedUserList = [];
+
     public selectedDialog: IDialogs = null;
 
     @action
     public setSelectedDialog(dialog) {
         this.selectedDialog = dialog;
+    }
+
+    @action
+    public setBlockedUserList(dialogs) {
+        this.blockedUserList = dialogs;
     }
 
     private savingData = false;
@@ -59,7 +67,7 @@ class DialogsStore {
     @action
     public setUserIsTyping(userId, IsTyping) {
         this.dialogs.forEach(x => {
-            if (x.otherUserId === userId) {
+            if (x.otherUserId === userId && !x.blockedByUserIds.includes(userstore.user.userId)) {
                 x.isUserTyping = IsTyping;
             }
         });
@@ -113,7 +121,7 @@ class DialogsStore {
             this.selectedDialog.blockedByUserIds.push(userstore.user.userId)
         }
     }
-
+    
     public isUserBlocked() {
         if (this.selectedDialog !== null) {
             return this.selectedDialog.blockedByUserIds.includes(this.selectedDialog.otherUserId);

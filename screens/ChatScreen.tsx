@@ -16,6 +16,7 @@ import { chatHubStore } from "../chats/chat-client";
 import { DisabledChatToolbar } from "../components/base-components";
 import ChatContextMenu from "../components/context-menu";
 import { Overlay } from "react-native-elements";
+import { ToastAndroid } from "react-native";
 
 export interface IChatScreenSettingStore {
     inverted: boolean,
@@ -133,7 +134,10 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
                 chatStore.markMessageDelivered(this.selectedDialog.dialogId)
             })
             .catch((e) => {
-                console.error(e.message);
+                console.error();
+                if(e.response.status == 403){
+                    ToastAndroid.show('You cannot send messages to this chat', ToastAndroid.SHORT);
+                }
             })
     }
 
@@ -246,8 +250,8 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
     )
 
     renderSend = (props: Send['props']) => (
-        <Send {...props} containerStyle={{ justifyContent: 'center' }}>
-            <MaterialIcons size={30} color={Colors.themeColor} name={'send'} />
+        <Send {...props} containerStyle={{ justifyContent: 'center', marginRight: 5 }}>
+            <MaterialIcons size={30} color={Colors.primary} name={'send'} />
         </Send>
     )
 
@@ -258,7 +262,7 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
     renderBubble = (props: any) => {
         return <Bubble wrapperStyle={{
             right: {
-                backgroundColor: Colors.themeColor
+                backgroundColor: Colors.primary,
             },
             left: {
                 backgroundColor: 'white'
@@ -271,7 +275,7 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
         return (
             <Overlay isVisible={chatStore.isLoading} statusBarTranslucent>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <ActivityIndicator size='large' color={Colors.themeColor} />
+                    <ActivityIndicator size='large' color={Colors.primary} />
                     <Text style={{ fontSize: 20, color: 'black', padding: 10 }}>Loading...</Text>
                 </View>
             </Overlay>
@@ -305,7 +309,7 @@ class ChatScreen extends React.Component<any, IChatScreenSettingStore> {
                     infiniteScroll
                     onInputTextChanged={this.onInputTextChange}
                     renderAvatar={this.renderAvatarImage}
-                    renderAccessory={this.renderAccessory}
+                    // renderAccessory={this.renderAccessory}
                 />
             </View>
         );

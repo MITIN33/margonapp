@@ -116,7 +116,6 @@ class SettingsScreen extends Component<any, ISettingsState> {
         this.setState({ loading: true })
         userstore.refreshUser()
             .then(user => {
-                console.log(JSON.stringify(user))
                 this.setState({
                     imageUri: userstore.user?.photoUrl,
                     availibilityFlag: user.isDiscoverable == 1 ? true : false,
@@ -141,7 +140,9 @@ class SettingsScreen extends Component<any, ISettingsState> {
 
     saveProfileData = async () => {
         let user: IUser = {};
+        this.setState({ loading: true })
         let isUserUpdated = false;
+
         if (userstore.user.displayName !== this.state.displayName) {
             user.displayName = this.state.displayName;
             isUserUpdated = true;
@@ -157,23 +158,28 @@ class SettingsScreen extends Component<any, ISettingsState> {
         }
         if (userstore.user.photoUrl !== this.state.imageUri) {
             var path = `profile-pics/${userstore.user.userId}.jpeg`;
+            console.log(path)
             try {
                 const ref = firebaseApp.storage().ref(path);
-                await ref.putFile(user.photoUrl)
+                await ref.putFile(this.state.imageUri)
                 var url = await ref.getDownloadURL();
                 user.photoUrl = url;
                 isUserUpdated = true;
-            } catch { }
+            } catch (err) {
+                console.log(err)
+                ToastAndroid.show('Something went wrong, please try again', ToastAndroid.SHORT)
+            }
         }
 
         if (isUserUpdated) {
-            this.setState({ loading: true })
+            console.log(JSON.stringify(user));
             userstore.updateUser(user)
                 .catch(() => ToastAndroid.show('Something went wrong, please try again', ToastAndroid.SHORT))
                 .finally(() => this.setState({ loading: false }))
         }
         else {
-            console.log('No prop chagned for user');
+            console.log('No prop changed for user');
+            this.setState({ loading: false })
         }
     }
 
@@ -211,6 +217,7 @@ class SettingsScreen extends Component<any, ISettingsState> {
                 {this.renderBottomSheet()}
                 {this.renderDistanceOverLay()}
                 <MgList title={'Profile'} listItems={this.state.list} />
+                <MgList title={'Privacy'} listItems={[{ title: 'Blocked List', action: () => { this.props.navigation.navigate('Blocked')} }]} />
                 <Button TouchableComponent={TouchableWithoutFeedback} titleStyle={{ color: 'red', fontWeight: '100' }} containerStyle={{ height: 50, marginTop: 30 }} buttonStyle={{ height: 50, backgroundColor: 'white' }} title='Sign Out' onPress={this.OnHandleSignOut} />
                 {this.renderEditTextBox()}
             </ScrollView>

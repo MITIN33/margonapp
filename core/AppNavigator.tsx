@@ -20,13 +20,14 @@ import ProfileScreen from "../screens/ProfileScreen";
 import { firebaseApp } from "../api/firebase-config";
 import NetInfo from "@react-native-community/netinfo";
 import { appSettings } from "../stores/AppStore";
+import BlockedScreen from "../screens/BlockedScreen";
 
 const Stack = createStackNavigator();
 
 @observer
 class AppNavigator extends Component<any, any> {
 
-    netSubscribe;
+    unSubscribe;
 
     constructor(props) {
         super(props);
@@ -40,7 +41,7 @@ class AppNavigator extends Component<any, any> {
     componentDidMount() {
         this.setState({ isLoading: true })
 
-        this.netSubscribe = NetInfo.addEventListener(state => {
+        this.unSubscribe = NetInfo.addEventListener(state => {
             appSettings.setIsconnected(state.isConnected);
         });
 
@@ -61,7 +62,7 @@ class AppNavigator extends Component<any, any> {
 
 
     componentWillUnmount() {
-        this.netSubscribe();
+        this.unSubscribe();
     }
 
     header = (navigation) => {
@@ -115,6 +116,11 @@ class AppNavigator extends Component<any, any> {
                                 }} />
                                 <Stack.Screen name="Settings" component={SettingsScreen} options={{
                                     title: 'Settings',
+                                    headerShown: true,
+                                    headerStyle: headerStyle
+                                }} />
+                                <Stack.Screen name="Blocked" component={BlockedScreen} options={{
+                                    title: 'Blocked Users',
                                     headerShown: true,
                                     headerStyle: headerStyle
                                 }} />
